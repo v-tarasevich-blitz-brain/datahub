@@ -493,9 +493,9 @@ export const SearchBar = ({
                             }, 0);
                         }
                     }}
-                    open={isDropdownVisible || true}
+                    open={isDropdownVisible || false}
                     // listHeight={480}
-                    dropdownContentHeight={880}
+                    dropdownContentHeight={480}
                     showWrapping
                 >
                     <AutoCompleteContainer
