@@ -138,6 +138,10 @@ const Blur = styled.div<{ $isOpen?: boolean }>`
     ${(props) => !props.$isOpen && 'display: none;'}
 `;
 
+interface ViewSelectProps {
+    onOpenChange?: () => void;
+}
+
 /**
  * The View Select component allows you to select a View to apply to query on the current page. For example,
  * search, recommendations, and browse.
@@ -147,7 +151,7 @@ const Blur = styled.div<{ $isOpen?: boolean }>`
  *
  * In the event that a user refreshes their browser, the state of the view should be saved as well.
  */
-export const ViewSelect = () => {
+export const ViewSelect = ({ onOpenChange }: ViewSelectProps) => {
     const history = useHistory();
     const userContext = useUserContext();
     const [viewBuilderDisplayState, setViewBuilderDisplayState] = useState<ViewBuilderDisplayState>(
@@ -302,6 +306,7 @@ export const ViewSelect = () => {
                     onOpenChange={() => {
                         scrollToRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
                         setIsOpen(!isOpen);
+                        onOpenChange?.();
                     }}
                     content={
                         <>
