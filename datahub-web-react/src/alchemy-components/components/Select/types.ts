@@ -5,9 +5,10 @@ export type SelectSizeOptions = 'sm' | 'md' | 'lg';
 
 export interface SelectOption {
     value: string;
-    label: string;
+    label: React.ReactNode;
     description?: string;
     icon?: React.ReactNode;
+    filter?: (option: SelectOption, query: string) => boolean;
 }
 
 export type SelectLabelVariants = 'default' | 'labeled';
@@ -26,7 +27,7 @@ export interface SelectProps {
     isReadOnly?: boolean;
     isRequired?: boolean;
     showClear?: boolean;
-    width?: number | 'full';
+    width?: number | 'full' | 'fit-content';
     isMultiSelect?: boolean;
     placeholder?: string;
     disabledValues?: string[];
@@ -47,7 +48,7 @@ export interface SelectStyleProps {
     isReadOnly?: boolean;
     isRequired?: boolean;
     isOpen?: boolean;
-    width?: number | 'full';
+    width?: number | 'full' | 'fit-content';
 }
 
 export interface ActionButtonsProps {

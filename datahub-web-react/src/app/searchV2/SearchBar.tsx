@@ -32,6 +32,8 @@ import AutoCompleteResult from '../entityV2/shared/components/AutoCompleteResult
 import AutocompleteFooter from '../entityV2/shared/components/AutoCompleteResult/AutocompleteFooter';
 import { AutoComplete } from '@src/alchemy-components/components/AutoComplete';
 import { useGetSearchResultsForMultipleQuery } from '@src/graphql/search.generated';
+import { SearchFiltersContext } from './filtersPrototype/SearchFiltersContext';
+import SearchFilters from './filtersPrototype/SearchFilters';
 
 const StyledAutoComplete = styled(AutoComplete)<{ $isShowNavBarRedesign?: boolean }>`
     width: 100%;
@@ -238,25 +240,26 @@ export const SearchBar = ({
     // const {data} = useGetSearchResultsForMultipleQuery()
 
     const quickFilterAutoCompleteOption = useMemo(() => {
-        if (!showQuickFilters) {
-            return null;
-        }
-        if (!showAutoCompleteResults) {
-            // If we've disabled showing any autocomplete results, we also hide the "Filter By" flow.
-            return null;
-        }
-        if (!quickFilters?.length) {
-            return null;
-        }
+        // if (!showQuickFilters) {
+        //     return null;
+        // }
+        // if (!showAutoCompleteResults) {
+        //     // If we've disabled showing any autocomplete results, we also hide the "Filter By" flow.
+        //     return null;
+        // }
+        // if (!quickFilters?.length) {
+        //     return null;
+        // }
         return {
             label: <EntityTypeLabel>Filter by</EntityTypeLabel>,
             options: [
                 {
                     value: 'quick-filter-unique-key',
                     type: '',
-                    label: <QuickFilters searchQuery={searchQuery} setIsDropdownVisible={setIsDropdownVisible} />,
-                    style: { padding: '8px', cursor: 'auto' },
-                    disabled: true,
+                    // label: <QuickFilters searchQuery={searchQuery} setIsDropdownVisible={setIsDropdownVisible} />,
+                    label: <SearchFilters/>,
+                    style: { padding: '8px', cursor: 'auto', pointerEvents: 'all' },
+                    // disabled: true,
                 },
             ],
         };
@@ -337,8 +340,8 @@ export const SearchBar = ({
     const options = useMemo(() => {
         const autoCompleteOptions =
             showAutoCompleteResults && autoCompleteEntityOptions.length ? autoCompleteEntityOptions : emptyQueryOptions;
+        const quickFilterOptions = quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
         // const quickFilterOptions = quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
-        const quickFilterOptions = [];//quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
         const baseOptions: any[] = [...autoCompleteQueryOptions, ...quickFilterOptions, ...autoCompleteOptions];
 
         if (showViewAllResults) {
@@ -441,6 +444,7 @@ export const SearchBar = ({
                         console.log(props);
                         return (
                             <div>
+                                <SearchFilters/>
                                 {props}
                                 <AutocompleteFooter />
                             </div>

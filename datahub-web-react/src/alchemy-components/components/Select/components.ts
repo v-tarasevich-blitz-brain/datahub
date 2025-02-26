@@ -43,7 +43,7 @@ export const SelectLabelContainer = styled.div({
 // Container for the Basic Select component
 interface ContainerProps {
     size: SelectSizeOptions;
-    width?: number | 'full';
+    width?: number | 'full' | 'fit-content';
     $selectLabelVariant?: SelectLabelVariants;
     isSelected?: boolean;
 }
@@ -60,7 +60,7 @@ export const Container = styled.div<ContainerProps>(({ size, width, $selectLabel
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        width: width === 'full' ? '100%' : `${width}px`,
+        width: width === 'fit-content' ? 'fit-content' : width === 'full' ? '100%' : `${width}px`,
         gap: '4px',
         transition: sharedTransition,
         minWidth: getMinWidth(),
@@ -76,7 +76,7 @@ export const Dropdown = styled.div({
     right: 0,
     borderRadius: radius.md,
     background: colors.white,
-    zIndex: 900,
+    zIndex: 1050, // autocomplete z-index
     transition: sharedTransition,
     boxShadow: shadows.dropdown,
     padding: spacing.xsm,
@@ -86,6 +86,8 @@ export const Dropdown = styled.div({
     marginTop: '4px',
     maxHeight: '360px',
     overflow: 'auto',
+    width: 'fit-content',
+    minWidth: '250px',
 });
 
 export const SearchInputContainer = styled.div({

@@ -25,6 +25,7 @@ import {
 import SelectLabelRenderer from './private/SelectLabelRenderer/SelectLabelRenderer';
 import { ActionButtonsProps, SelectOption, SelectProps } from './types';
 import { getFooterButtonSize } from './utils';
+import { basicSelectDefaults, selectDefaults } from './defaults';
 
 const SelectActionButtons = ({
     selectedValues,
@@ -44,42 +45,25 @@ const SelectActionButtons = ({
     );
 };
 
-// Updated main component
-export const selectDefaults: SelectProps = {
-    options: [],
-    label: '',
-    size: 'md',
-    showSearch: false,
-    isDisabled: false,
-    isReadOnly: false,
-    isRequired: false,
-    isMultiSelect: false,
-    showClear: false,
-    placeholder: 'Select an option',
-    showSelectAll: false,
-    selectAllLabel: 'Select All',
-    showDescriptions: false,
-};
-
 export const BasicSelect = ({
-    options = selectDefaults.options,
-    label = selectDefaults.label,
+    options = basicSelectDefaults.options,
+    label = basicSelectDefaults.label,
     values = [],
     initialValues,
     onCancel,
     onUpdate,
-    showSearch = selectDefaults.showSearch,
-    isDisabled = selectDefaults.isDisabled,
-    isReadOnly = selectDefaults.isReadOnly,
-    isRequired = selectDefaults.isRequired,
-    showClear = selectDefaults.showClear,
-    size = selectDefaults.size,
-    isMultiSelect = selectDefaults.isMultiSelect,
-    placeholder = selectDefaults.placeholder,
+    showSearch = basicSelectDefaults.showSearch,
+    isDisabled = basicSelectDefaults.isDisabled,
+    isReadOnly = basicSelectDefaults.isReadOnly,
+    isRequired = basicSelectDefaults.isRequired,
+    showClear = basicSelectDefaults.showClear,
+    size = basicSelectDefaults.size,
+    isMultiSelect = basicSelectDefaults.isMultiSelect,
+    placeholder = basicSelectDefaults.placeholder,
     disabledValues = [],
-    showSelectAll = selectDefaults.showSelectAll,
-    selectAllLabel = selectDefaults.selectAllLabel,
-    showDescriptions = selectDefaults.showDescriptions,
+    showSelectAll = basicSelectDefaults.showSelectAll,
+    selectAllLabel = basicSelectDefaults.selectAllLabel,
+    showDescriptions = basicSelectDefaults.showDescriptions,
     icon,
     ...props
 }: SelectProps) => {
@@ -101,7 +85,13 @@ export const BasicSelect = ({
     }, [options, tempValues]);
 
     const filteredOptions = useMemo(
-        () => options.filter((option) => option.label.toLowerCase().includes(searchQuery.toLowerCase())),
+        () => options.filter((option) => {
+            if (typeof option.label === 'string') {
+                return option.label.toLowerCase().includes(searchQuery.toLowerCase());
+            }
+
+            return option?.filter?.(option, searchQuery) ?? false;
+        }),
         [options, searchQuery],
     );
 
@@ -217,6 +207,7 @@ export const BasicSelect = ({
             </SelectBase>
             {isOpen && (
                 <Dropdown>
+                    <div style={{position: 'relative', zIndex:1000}}>
                     {showSearch && (
                         <SearchInputContainer>
                             <SearchInput
@@ -296,6 +287,7 @@ export const BasicSelect = ({
                             Update
                         </Button>
                     </FooterBase>
+                    </div>
                 </Dropdown>
             )}
         </Container>

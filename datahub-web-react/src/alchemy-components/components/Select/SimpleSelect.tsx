@@ -1,6 +1,6 @@
 import { Text } from '@components';
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActionButtonsContainer,
     Container,
@@ -22,6 +22,10 @@ import {
 } from './components';
 import SelectLabelRenderer from './private/SelectLabelRenderer/SelectLabelRenderer';
 import { ActionButtonsProps, SelectOption, SelectProps } from './types';
+import { createPortal } from 'react-dom';
+import { selectDefaults } from './defaults';
+import { AutoCompleteContext } from '../AutoComplete/AutoComplete';
+import { E } from 'vitest/dist/reporters-5f784f42';
 
 const SelectActionButtons = ({
     selectedValues,
@@ -39,23 +43,6 @@ const SelectActionButtons = ({
             <StyledIcon icon="ChevronLeft" rotate={isOpen ? '90' : '270'} size="lg" />
         </ActionButtonsContainer>
     );
-};
-
-export const selectDefaults: SelectProps = {
-    options: [],
-    label: '',
-    size: 'md',
-    showSearch: false,
-    isDisabled: false,
-    isReadOnly: false,
-    isRequired: false,
-    showClear: true,
-    width: 255,
-    isMultiSelect: false,
-    placeholder: 'Select an option ',
-    showSelectAll: false,
-    selectAllLabel: 'Select All',
-    showDescriptions: false,
 };
 
 export const SimpleSelect = ({
@@ -88,18 +75,46 @@ export const SimpleSelect = ({
     const selectRef = useRef<HTMLDivElement>(null);
     const [areAllSelected, setAreAllSelected] = useState(false);
 
+    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>();
+
+  const selectElementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = selectElementRef.current;
+    if (container) {
+      const { top, left, width } = container.getBoundingClientRect();
+    //   debugger;
+      setDropdownStyle({
+        top: `${top + window.scrollY + container.offsetHeight}px`,
+        left: `${left + window.scrollX}px`,
+      });
+    }
+  }, [selectElementRef]);
+
+
     useEffect(() => {
         if (values?.length > 0 && !isEqual(selectedValues, values)) {
             setSelectedValues(values);
         }
     }, [values, selectedValues]);
 
+    const {portal, test} = useContext(AutoCompleteContext)
+
+
+
     useEffect(() => {
         setAreAllSelected(selectedValues.length === options.length);
     }, [options, selectedValues]);
 
     const filteredOptions = useMemo(
-        () => options.filter((option) => option.label.toLowerCase().includes(searchQuery.toLowerCase())),
+        () =>
+            options.filter((option) => {
+                if (typeof option.label === 'string') {
+                    return option.label.toLowerCase().includes(searchQuery.toLowerCase());
+                }
+
+                return option?.filter?.(option, searchQuery) ?? false;
+            }),
         [options, searchQuery],
     );
 
@@ -158,7 +173,10 @@ export const SimpleSelect = ({
         setAreAllSelected(!areAllSelected);
     };
 
+    console.log('>>> select', {dropdownStyle, portal, test});
+
     return (
+        <>
         <Container
             ref={selectRef}
             size={size || 'md'}
@@ -174,6 +192,7 @@ export const SimpleSelect = ({
                 isOpen={isOpen}
                 onClick={handleSelectClick}
                 fontSize={size}
+                ref={selectElementRef}
                 {...props}
             >
                 <SelectLabelContainer>
@@ -200,83 +219,319 @@ export const SimpleSelect = ({
             </SelectBase>
             {isOpen && (
                 <Dropdown>
-                    {showSearch && (
-                        <SearchInputContainer>
-                            <SearchInput
-                                type="text"
-                                placeholder="Search…"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{ fontSize: size || 'md' }}
-                            />
-                            <SearchIcon icon="Search" size={size} color="gray" />
-                        </SearchInputContainer>
+                {showSearch && (
+                    <SearchInputContainer>
+                        <SearchInput
+                            type="text"
+                            placeholder="Search…"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ fontSize: size || 'md' }}
+                        />
+                        <SearchIcon icon="Search" size={size} color="gray" />
+                    </SearchInputContainer>
+                )}
+                <OptionList data-testid={optionListTestId}>
+                    {showSelectAll && isMultiSelect && (
+                        <SelectAllOption
+                            isSelected={areAllSelected}
+                            onClick={() => !(disabledValues.length === options.length) && handleSelectAll()}
+                            isDisabled={disabledValues.length === options.length}
+                        >
+                            <LabelContainer>
+                                <span>{selectAllLabel}</span>
+                                <StyledCheckbox
+                                    checked={areAllSelected}
+                                    disabled={disabledValues.length === options.length}
+                                />
+                            </LabelContainer>
+                        </SelectAllOption>
                     )}
-                    <OptionList data-testid={optionListTestId}>
-                        {showSelectAll && isMultiSelect && (
-                            <SelectAllOption
-                                isSelected={areAllSelected}
-                                onClick={() => !(disabledValues.length === options.length) && handleSelectAll()}
-                                isDisabled={disabledValues.length === options.length}
-                            >
+                    {filteredOptions.map((option) => (
+                        <OptionLabel
+                            key={option.value}
+                            onClick={() => {
+                                if (!isMultiSelect) {
+                                    if (optionSwitchable && selectedValues.includes(option.value)) {
+                                        handleClearSelection();
+                                    } else {
+                                        handleOptionChange(option);
+                                    }
+                                }
+                            }}
+                            isSelected={selectedValues.includes(option.value)}
+                            isMultiSelect={isMultiSelect}
+                            isDisabled={disabledValues?.includes(option.value)}
+                        >
+                            {isMultiSelect ? (
                                 <LabelContainer>
-                                    <span>{selectAllLabel}</span>
+                                    <span>{option.label}</span>
                                     <StyledCheckbox
-                                        checked={areAllSelected}
-                                        disabled={disabledValues.length === options.length}
+                                        onClick={() => handleOptionChange(option)}
+                                        checked={selectedValues.includes(option.value)}
+                                        disabled={disabledValues?.includes(option.value)}
                                     />
                                 </LabelContainer>
-                            </SelectAllOption>
-                        )}
-                        {filteredOptions.map((option) => (
-                            <OptionLabel
-                                key={option.value}
-                                onClick={() => {
-                                    if (!isMultiSelect) {
-                                        if (optionSwitchable && selectedValues.includes(option.value)) {
-                                            handleClearSelection();
-                                        } else {
-                                            handleOptionChange(option);
-                                        }
-                                    }
-                                }}
-                                isSelected={selectedValues.includes(option.value)}
-                                isMultiSelect={isMultiSelect}
-                                isDisabled={disabledValues?.includes(option.value)}
-                            >
-                                {isMultiSelect ? (
-                                    <LabelContainer>
-                                        <span>{option.label}</span>
-                                        <StyledCheckbox
-                                            onClick={() => handleOptionChange(option)}
-                                            checked={selectedValues.includes(option.value)}
-                                            disabled={disabledValues?.includes(option.value)}
-                                        />
-                                    </LabelContainer>
-                                ) : (
-                                    <OptionContainer>
-                                        <ActionButtonsContainer>
-                                            {option.icon}
-                                            <Text
-                                                weight="semiBold"
-                                                size="md"
-                                                color={selectedValues.includes(option.value) ? 'violet' : 'gray'}
-                                            >
-                                                {option.label}
-                                            </Text>
-                                        </ActionButtonsContainer>
-                                        {!!option.description && (
-                                            <Text color="gray" weight="normal" size="sm">
-                                                {option.description}
-                                            </Text>
-                                        )}
-                                    </OptionContainer>
-                                )}
-                            </OptionLabel>
-                        ))}
-                    </OptionList>
-                </Dropdown>
+                            ) : (
+                                <OptionContainer>
+                                    <ActionButtonsContainer>
+                                        {option.icon}
+                                        <Text
+                                            weight="semiBold"
+                                            size="md"
+                                            color={selectedValues.includes(option.value) ? 'violet' : 'gray'}
+                                        >
+                                            {option.label}
+                                        </Text>
+                                    </ActionButtonsContainer>
+                                    {!!option.description && (
+                                        <Text color="gray" weight="normal" size="sm">
+                                            {option.description}
+                                        </Text>
+                                    )}
+                                </OptionContainer>
+                            )}
+                        </OptionLabel>
+                    ))}
+                </OptionList>
+            </Dropdown>
+            // createPortal(
+            //     <Dropdown style={dropdownStyle}>
+            //         {showSearch && (
+            //             <SearchInputContainer>
+            //                 <SearchInput
+            //                     type="text"
+            //                     placeholder="Search…"
+            //                     value={searchQuery}
+            //                     onChange={(e) => setSearchQuery(e.target.value)}
+            //                     style={{ fontSize: size || 'md' }}
+            //                 />
+            //                 <SearchIcon icon="Search" size={size} color="gray" />
+            //             </SearchInputContainer>
+            //         )}
+            //         <OptionList data-testid={optionListTestId}>
+            //             {showSelectAll && isMultiSelect && (
+            //                 <SelectAllOption
+            //                     isSelected={areAllSelected}
+            //                     onClick={() => !(disabledValues.length === options.length) && handleSelectAll()}
+            //                     isDisabled={disabledValues.length === options.length}
+            //                 >
+            //                     <LabelContainer>
+            //                         <span>{selectAllLabel}</span>
+            //                         <StyledCheckbox
+            //                             checked={areAllSelected}
+            //                             disabled={disabledValues.length === options.length}
+            //                         />
+            //                     </LabelContainer>
+            //                 </SelectAllOption>
+            //             )}
+            //             {filteredOptions.map((option) => (
+            //                 <OptionLabel
+            //                     key={option.value}
+            //                     onClick={() => {
+            //                         if (!isMultiSelect) {
+            //                             if (optionSwitchable && selectedValues.includes(option.value)) {
+            //                                 handleClearSelection();
+            //                             } else {
+            //                                 handleOptionChange(option);
+            //                             }
+            //                         }
+            //                     }}
+            //                     isSelected={selectedValues.includes(option.value)}
+            //                     isMultiSelect={isMultiSelect}
+            //                     isDisabled={disabledValues?.includes(option.value)}
+            //                 >
+            //                     {isMultiSelect ? (
+            //                         <LabelContainer>
+            //                             <span>{option.label}</span>
+            //                             <StyledCheckbox
+            //                                 onClick={() => handleOptionChange(option)}
+            //                                 checked={selectedValues.includes(option.value)}
+            //                                 disabled={disabledValues?.includes(option.value)}
+            //                             />
+            //                         </LabelContainer>
+            //                     ) : (
+            //                         <OptionContainer>
+            //                             <ActionButtonsContainer>
+            //                                 {option.icon}
+            //                                 <Text
+            //                                     weight="semiBold"
+            //                                     size="md"
+            //                                     color={selectedValues.includes(option.value) ? 'violet' : 'gray'}
+            //                                 >
+            //                                     {option.label}
+            //                                 </Text>
+            //                             </ActionButtonsContainer>
+            //                             {!!option.description && (
+            //                                 <Text color="gray" weight="normal" size="sm">
+            //                                     {option.description}
+            //                                 </Text>
+            //                             )}
+            //                         </OptionContainer>
+            //                     )}
+            //                 </OptionLabel>
+            //             ))}
+            //         </OptionList>
+            //     </Dropdown>, portal as Element)
             )}
         </Container>
+        {/* {isOpen && (
+                <Dropdown>
+                {showSearch && (
+                    <SearchInputContainer>
+                        <SearchInput
+                            type="text"
+                            placeholder="Search…"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ fontSize: size || 'md' }}
+                        />
+                        <SearchIcon icon="Search" size={size} color="gray" />
+                    </SearchInputContainer>
+                )}
+                <OptionList data-testid={optionListTestId}>
+                    {showSelectAll && isMultiSelect && (
+                        <SelectAllOption
+                            isSelected={areAllSelected}
+                            onClick={() => !(disabledValues.length === options.length) && handleSelectAll()}
+                            isDisabled={disabledValues.length === options.length}
+                        >
+                            <LabelContainer>
+                                <span>{selectAllLabel}</span>
+                                <StyledCheckbox
+                                    checked={areAllSelected}
+                                    disabled={disabledValues.length === options.length}
+                                />
+                            </LabelContainer>
+                        </SelectAllOption>
+                    )}
+                    {filteredOptions.map((option) => (
+                        <OptionLabel
+                            key={option.value}
+                            onClick={() => {
+                                if (!isMultiSelect) {
+                                    if (optionSwitchable && selectedValues.includes(option.value)) {
+                                        handleClearSelection();
+                                    } else {
+                                        handleOptionChange(option);
+                                    }
+                                }
+                            }}
+                            isSelected={selectedValues.includes(option.value)}
+                            isMultiSelect={isMultiSelect}
+                            isDisabled={disabledValues?.includes(option.value)}
+                        >
+                            {isMultiSelect ? (
+                                <LabelContainer>
+                                    <span>{option.label}</span>
+                                    <StyledCheckbox
+                                        onClick={() => handleOptionChange(option)}
+                                        checked={selectedValues.includes(option.value)}
+                                        disabled={disabledValues?.includes(option.value)}
+                                    />
+                                </LabelContainer>
+                            ) : (
+                                <OptionContainer>
+                                    <ActionButtonsContainer>
+                                        {option.icon}
+                                        <Text
+                                            weight="semiBold"
+                                            size="md"
+                                            color={selectedValues.includes(option.value) ? 'violet' : 'gray'}
+                                        >
+                                            {option.label}
+                                        </Text>
+                                    </ActionButtonsContainer>
+                                    {!!option.description && (
+                                        <Text color="gray" weight="normal" size="sm">
+                                            {option.description}
+                                        </Text>
+                                    )}
+                                </OptionContainer>
+                            )}
+                        </OptionLabel>
+                    ))}
+                </OptionList>
+            </Dropdown>
+                // createPortal(
+                // <Dropdown style={dropdownStyle}>
+                //     {showSearch && (
+                //         <SearchInputContainer>
+                //             <SearchInput
+                //                 type="text"
+                //                 placeholder="Search…"
+                //                 value={searchQuery}
+                //                 onChange={(e) => setSearchQuery(e.target.value)}
+                //                 style={{ fontSize: size || 'md' }}
+                //             />
+                //             <SearchIcon icon="Search" size={size} color="gray" />
+                //         </SearchInputContainer>
+                //     )}
+                //     <OptionList data-testid={optionListTestId}>
+                //         {showSelectAll && isMultiSelect && (
+                //             <SelectAllOption
+                //                 isSelected={areAllSelected}
+                //                 onClick={() => !(disabledValues.length === options.length) && handleSelectAll()}
+                //                 isDisabled={disabledValues.length === options.length}
+                //             >
+                //                 <LabelContainer>
+                //                     <span>{selectAllLabel}</span>
+                //                     <StyledCheckbox
+                //                         checked={areAllSelected}
+                //                         disabled={disabledValues.length === options.length}
+                //                     />
+                //                 </LabelContainer>
+                //             </SelectAllOption>
+                //         )}
+                //         {filteredOptions.map((option) => (
+                //             <OptionLabel
+                //                 key={option.value}
+                //                 onClick={() => {
+                //                     if (!isMultiSelect) {
+                //                         if (optionSwitchable && selectedValues.includes(option.value)) {
+                //                             handleClearSelection();
+                //                         } else {
+                //                             handleOptionChange(option);
+                //                         }
+                //                     }
+                //                 }}
+                //                 isSelected={selectedValues.includes(option.value)}
+                //                 isMultiSelect={isMultiSelect}
+                //                 isDisabled={disabledValues?.includes(option.value)}
+                //             >
+                //                 {isMultiSelect ? (
+                //                     <LabelContainer>
+                //                         <span>{option.label}</span>
+                //                         <StyledCheckbox
+                //                             onClick={() => handleOptionChange(option)}
+                //                             checked={selectedValues.includes(option.value)}
+                //                             disabled={disabledValues?.includes(option.value)}
+                //                         />
+                //                     </LabelContainer>
+                //                 ) : (
+                //                     <OptionContainer>
+                //                         <ActionButtonsContainer>
+                //                             {option.icon}
+                //                             <Text
+                //                                 weight="semiBold"
+                //                                 size="md"
+                //                                 color={selectedValues.includes(option.value) ? 'violet' : 'gray'}
+                //                             >
+                //                                 {option.label}
+                //                             </Text>
+                //                         </ActionButtonsContainer>
+                //                         {!!option.description && (
+                //                             <Text color="gray" weight="normal" size="sm">
+                //                                 {option.description}
+                //                             </Text>
+                //                         )}
+                //                     </OptionContainer>
+                //                 )}
+                //             </OptionLabel>
+                //         ))}
+                //     </OptionList>
+                // </Dropdown>, document.body)
+            )} */}
+        </>
     );
 };
