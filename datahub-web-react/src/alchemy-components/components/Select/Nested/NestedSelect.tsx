@@ -6,7 +6,7 @@ import {
     ActionButtonsContainer,
     Container,
     CountBadge,
-    Dropdown,
+    DropdownContainer,
     OptionList,
     Placeholder,
     SearchIcon,
@@ -316,7 +316,7 @@ export const NestedSelect = ({
                 />
             </SelectBase>
             {isOpen && (
-                <Dropdown style={{ maxHeight: height, overflow: 'auto' }}>
+                <DropdownContainer style={{ maxHeight: height, overflow: 'auto' }}>
                     {showSearch && (
                         <SearchInputContainer>
                             <SearchInput
@@ -348,7 +348,7 @@ export const NestedSelect = ({
                             />
                         ))}
                     </OptionList>
-                </Dropdown>
+                </DropdownContainer>
             )}
         </Container>
     );

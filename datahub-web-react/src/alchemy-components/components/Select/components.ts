@@ -69,7 +69,7 @@ export const Container = styled.div<ContainerProps>(({ size, width, $selectLabel
     };
 });
 
-export const Dropdown = styled.div({
+export const DropdownContainer = styled.div({
     position: 'absolute',
     top: '100%',
     left: 0,
@@ -89,6 +89,8 @@ export const Dropdown = styled.div({
     width: 'fit-content',
     minWidth: '250px',
 });
+
+
 
 export const SearchInputContainer = styled.div({
     position: 'relative',

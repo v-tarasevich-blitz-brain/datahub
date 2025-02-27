@@ -5,7 +5,7 @@ import { Input } from '../Input';
 import {
     ActionButtonsContainer,
     Container,
-    Dropdown,
+    DropdownContainer,
     LabelsWrapper,
     OptionContainer,
     OptionLabel,
@@ -168,7 +168,7 @@ export default function AutoCompleteSelect<T>({
             </SelectBase>
             <input type="hidden" name={name} value={selectedValue?.value || ''} readOnly />
             {isOpen && (
-                <Dropdown>
+                <DropdownContainer>
                     <SearchInputContainer>
                         <Input
                             label=""
@@ -201,7 +201,7 @@ export default function AutoCompleteSelect<T>({
                             </OptionLabel>
                         ))}
                     </OptionList>
-                </Dropdown>
+                </DropdownContainer>
             )}
         </Container>
     );

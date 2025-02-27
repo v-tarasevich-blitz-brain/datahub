@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FeildFacetState, FieldName, SearchFiltersProvider } from './SearchFiltersContext';
 import { useAggregateAcrossEntitiesLazyQuery, useAggregateAcrossEntitiesQuery } from '@src/graphql/search.generated';
 import TestField from './TestField';
@@ -17,17 +17,27 @@ const Container = styled.div`
     /* position: relative; */
 `;
 
-export default function SearchFilters() {
+interface SearchFiltersProps {
+    query: string;
+}
+
+export default function SearchFilters({query}: SearchFiltersProps) {
     const fields = ['platform', 'domains'];
     // const [fieldsFacet, setFieldsFacet] = useState<FieldFacetState>({});
     // const [activeField, setActiveField] = useState<FieldName>();
     // const [updatingField, setUpdatingField] = useState<FieldName>();
 
+    const wrappedQuery = useMemo(()=> {
+        if (query.length === 0) return query;
+        if (query.length < 3) return `${query}*`;
+        return query;
+    }, [query])
+
     const { data, loading } = useAggregateAcrossEntitiesQuery({
         variables: {
             input: {
                 types: [],
-                query: 'p*',
+                query: wrappedQuery,
                 orFilters: [],
                 facets: fields,
             },

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
     ActionButtonsContainer,
     Container,
-    Dropdown,
+    DropdownContainer,
     FooterBase,
     LabelContainer,
     OptionContainer,
@@ -206,7 +206,7 @@ export const BasicSelect = ({
                 />
             </SelectBase>
             {isOpen && (
-                <Dropdown>
+                <DropdownContainer>
                     <div style={{position: 'relative', zIndex:1000}}>
                     {showSearch && (
                         <SearchInputContainer>
@@ -288,7 +288,7 @@ export const BasicSelect = ({
                         </Button>
                     </FooterBase>
                     </div>
-                </Dropdown>
+                </DropdownContainer>
             )}
         </Container>
     );

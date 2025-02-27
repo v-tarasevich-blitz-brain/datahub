@@ -257,7 +257,7 @@ export const SearchBar = ({
                     value: 'quick-filter-unique-key',
                     type: '',
                     // label: <QuickFilters searchQuery={searchQuery} setIsDropdownVisible={setIsDropdownVisible} />,
-                    label: <SearchFilters/>,
+                    label: <SearchFilters query={searchQuery ?? ''}/>,
                     style: { padding: '8px', cursor: 'auto', pointerEvents: 'all' },
                     // disabled: true,
                 },
@@ -444,7 +444,7 @@ export const SearchBar = ({
                         console.log(props);
                         return (
                             <div>
-                                <SearchFilters/>
+                                <SearchFilters query={searchQuery ?? ''}/>
                                 {props}
                                 <AutocompleteFooter />
                             </div>
