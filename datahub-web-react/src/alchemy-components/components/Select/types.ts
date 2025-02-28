@@ -9,11 +9,13 @@ export interface SelectOption {
     description?: string;
     icon?: React.ReactNode;
     filter?: (option: SelectOption, query: string) => boolean;
+    [key: string]: any;
 }
 
 export type SelectLabelVariants = 'default' | 'labeled';
 
 export interface SelectProps {
+    searchFilter?: (options: SelectOption[], query: string) => SelectOption[];
     options: SelectOption[];
     label?: string;
     values?: string[];

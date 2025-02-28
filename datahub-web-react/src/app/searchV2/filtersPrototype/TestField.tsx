@@ -1,51 +1,57 @@
-import { Select, SelectOption, SimpleSelect } from '@src/alchemy-components';
-import { useSearchFiltersContext } from './SearchFiltersContext';
-import { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { SelectOption, SimpleSelect } from '@src/alchemy-components';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FilterRendererProps } from './types';
+import { FilterOperator } from '@src/types.generated';
 
-const Container = styled.div`
-    width: fit-content;
-`;
-
-interface TestFieldProps {
-    fieldName: string;
-    values?: string[];
-    onUpdate: (values: string[]) => void;
-}
-
-export default function TestField({fieldName, values, onUpdate}: TestFieldProps) {
-    const { getFacets } = useSearchFiltersContext();
-
+export default function TestField({ fieldName, appliedFilters, onUpdate, facetState }: FilterRendererProps) {
     const [options, setOptions] = useState<SelectOption[]>([]);
+    const [label, setLabel] = useState<string>('Unknown');
 
-    const facet = useMemo(() => getFacets([fieldName])?.facets?.[0], [getFacets]);
+    // Selects should have only one applied filter
+    const values = useMemo(() => appliedFilters?.[0]?.values ?? [], [appliedFilters]);
 
     useEffect(() => {
-        const aggregations = facet?.aggregations;
+        const aggregations = facetState?.facet?.aggregations;
         if (aggregations) {
             setOptions(
                 aggregations.map((aggregation) => ({
                     value: aggregation.value,
-                    label: aggregation.displayName ?? aggregation.entity?.properties?.name ?? aggregation.entity?.properties?.displayName,
+                    label:
+                        aggregation.displayName ??
+                        aggregation.entity?.properties?.name ??
+                        aggregation.entity?.properties?.displayName,
                 })),
             );
         }
-    }, [facet]);
+    }, [facetState?.facet?.aggregations]);
 
-    console.log('>>> TestFIeld', { domainFacet: facet, options });
+    useEffect(() => {
+        const displayName = facetState?.facet?.displayName;
+        if (displayName) setLabel(displayName);
+    }, [facetState?.facet?.displayName]);
+
+    const onSelectUpdate = useCallback(
+        (values: string[]) => {
+            onUpdate?.([
+                {
+                    field: fieldName,
+                    condition: FilterOperator.Equal,
+                    values: values,
+                },
+            ]);
+        },
+        [onUpdate],
+    );
 
     return (
-        // <Container>
-            <SimpleSelect
-                // values={values}
-                onUpdate={onUpdate}
-                options={options}
-                isMultiSelect
-                showSearch
-                selectLabelProps={{ variant: 'labeled', label: fieldName }}
-                width={'fit-content'}
-                // width={150}
-            />
-        // </Container>
+        <SimpleSelect
+            values={values}
+            onUpdate={onSelectUpdate}
+            options={options}
+            isMultiSelect
+            showSearch
+            selectLabelProps={{ variant: 'labeled', label }}
+            width={'fit-content'}
+        />
     );
 }

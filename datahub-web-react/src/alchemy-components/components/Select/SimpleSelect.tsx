@@ -87,6 +87,7 @@ export const SimpleSelect = ({
     optionListTestId,
     optionSwitchable,
     selectLabelProps,
+    searchFilter,
     ...props
 }: SelectProps) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -123,17 +124,19 @@ export const SimpleSelect = ({
         setAreAllSelected(selectedValues.length === options.length);
     }, [options, selectedValues]);
 
-    const filteredOptions = useMemo(
-        () =>
-            options.filter((option) => {
-                if (typeof option.label === 'string') {
-                    return option.label.toLowerCase().includes(searchQuery.toLowerCase());
-                }
+    const filteredOptions = useMemo(() => {
+        if (searchFilter) {
+            return searchFilter(options, searchQuery);
+        }
 
-                return option?.filter?.(option, searchQuery) ?? false;
-            }),
-        [options, searchQuery],
-    );
+        return options.filter((option) => {
+            if (typeof option.label === 'string') {
+                return option.label.toLowerCase().includes(searchQuery.toLowerCase());
+            }
+
+            return option?.filter?.(option, searchQuery) ?? false;
+        });
+    }, [options, searchQuery, searchFilter]);
 
     const handleDocumentClick = useCallback((e: MouseEvent) => {
         if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
@@ -203,85 +206,89 @@ export const SimpleSelect = ({
             >
                 {label && <SelectLabel onClick={handleSelectClick}>{label}</SelectLabel>}
                 <Dropdown
-                    menu={{items: [{label: 'test', key: 'test'}]}}
-                    overlayClassName='autocomplete'
-                    dropdownRender={() => (<DropdownContainer>
-                        {showSearch && (
-                            <SearchInputContainer>
-                                <SearchInput
-                                    type="text"
-                                    placeholder="Search…"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    style={{ fontSize: size || 'md' }}
-                                />
-                                <SearchIcon icon="Search" size={size} color="gray" />
-                            </SearchInputContainer>
-                        )}
-                        <OptionList data-testid={optionListTestId}>
-                            {showSelectAll && isMultiSelect && (
-                                <SelectAllOption
-                                    isSelected={areAllSelected}
-                                    onClick={() => !(disabledValues.length === options.length) && handleSelectAll()}
-                                    isDisabled={disabledValues.length === options.length}
-                                >
-                                    <LabelContainer>
-                                        <span>{selectAllLabel}</span>
-                                        <StyledCheckbox
-                                            checked={areAllSelected}
-                                            disabled={disabledValues.length === options.length}
-                                        />
-                                    </LabelContainer>
-                                </SelectAllOption>
+                    menu={{ items: [{ label: 'test', key: 'test' }] }}
+                    overlayClassName="autocomplete"
+                    dropdownRender={() => (
+                        <DropdownContainer>
+                            {showSearch && (
+                                <SearchInputContainer>
+                                    <SearchInput
+                                        type="text"
+                                        placeholder="Search…"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        style={{ fontSize: size || 'md' }}
+                                    />
+                                    <SearchIcon icon="Search" size={size} color="gray" />
+                                </SearchInputContainer>
                             )}
-                            {filteredOptions.map((option) => (
-                                <OptionLabel
-                                    key={option.value}
-                                    onClick={() => {
-                                        if (!isMultiSelect) {
-                                            if (optionSwitchable && selectedValues.includes(option.value)) {
-                                                handleClearSelection();
-                                            } else {
-                                                handleOptionChange(option);
-                                            }
-                                        }
-                                    }}
-                                    isSelected={selectedValues.includes(option.value)}
-                                    isMultiSelect={isMultiSelect}
-                                    isDisabled={disabledValues?.includes(option.value)}
-                                >
-                                    {isMultiSelect ? (
+                            <OptionList data-testid={optionListTestId}>
+                                {showSelectAll && isMultiSelect && (
+                                    <SelectAllOption
+                                        isSelected={areAllSelected}
+                                        onClick={() => !(disabledValues.length === options.length) && handleSelectAll()}
+                                        isDisabled={disabledValues.length === options.length}
+                                    >
                                         <LabelContainer>
-                                            <span>{option.label}</span>
+                                            <span>{selectAllLabel}</span>
                                             <StyledCheckbox
-                                                onClick={() => handleOptionChange(option)}
-                                                checked={selectedValues.includes(option.value)}
-                                                disabled={disabledValues?.includes(option.value)}
+                                                checked={areAllSelected}
+                                                disabled={disabledValues.length === options.length}
                                             />
                                         </LabelContainer>
-                                    ) : (
-                                        <OptionContainer>
-                                            <ActionButtonsContainer>
-                                                {option.icon}
-                                                <Text
-                                                    weight="semiBold"
-                                                    size="md"
-                                                    color={selectedValues.includes(option.value) ? 'violet' : 'gray'}
-                                                >
-                                                    {option.label}
-                                                </Text>
-                                            </ActionButtonsContainer>
-                                            {!!option.description && (
-                                                <Text color="gray" weight="normal" size="sm">
-                                                    {option.description}
-                                                </Text>
-                                            )}
-                                        </OptionContainer>
-                                    )}
-                                </OptionLabel>
-                            ))}
-                        </OptionList>
-                    </DropdownContainer>)}
+                                    </SelectAllOption>
+                                )}
+                                {filteredOptions.map((option) => (
+                                    <OptionLabel
+                                        key={option.value}
+                                        onClick={() => {
+                                            if (!isMultiSelect) {
+                                                if (optionSwitchable && selectedValues.includes(option.value)) {
+                                                    handleClearSelection();
+                                                } else {
+                                                    handleOptionChange(option);
+                                                }
+                                            }
+                                        }}
+                                        isSelected={selectedValues.includes(option.value)}
+                                        isMultiSelect={isMultiSelect}
+                                        isDisabled={disabledValues?.includes(option.value)}
+                                    >
+                                        {isMultiSelect ? (
+                                            <LabelContainer>
+                                                <span>{option.label}</span>
+                                                <StyledCheckbox
+                                                    onClick={() => handleOptionChange(option)}
+                                                    checked={selectedValues.includes(option.value)}
+                                                    disabled={disabledValues?.includes(option.value)}
+                                                />
+                                            </LabelContainer>
+                                        ) : (
+                                            <OptionContainer>
+                                                <ActionButtonsContainer>
+                                                    {option.icon}
+                                                    <Text
+                                                        weight="semiBold"
+                                                        size="md"
+                                                        color={
+                                                            selectedValues.includes(option.value) ? 'violet' : 'gray'
+                                                        }
+                                                    >
+                                                        {option.label}
+                                                    </Text>
+                                                </ActionButtonsContainer>
+                                                {!!option.description && (
+                                                    <Text color="gray" weight="normal" size="sm">
+                                                        {option.description}
+                                                    </Text>
+                                                )}
+                                            </OptionContainer>
+                                        )}
+                                    </OptionLabel>
+                                ))}
+                            </OptionList>
+                        </DropdownContainer>
+                    )}
                 >
                     <SelectBase
                         isDisabled={isDisabled}

@@ -1,19 +1,23 @@
-import { FacetFilterInput, FacetMetadata } from '@src/types.generated';
-import React, { useContext, useState } from 'react';
-import { SearchFiltersContextType, SearchFiltersProviderProps } from './types';
-
-// export type FeildFacetState = {
-//     facet?: FacetMetadata | undefined;
-//     loading?: boolean;
-// };
-
-// export type FieldFacetGetter = (fieldName: string) => FeildFacetState | undefined;
-// export type FieldName = string;
+import { FacetFilterInput, FilterOperator } from '@src/types.generated';
+import React, { useCallback, useContext, useState } from 'react';
+import DefaultFiltersRenderer from './defaults/DefaultFiltersRenderer';
+import {
+    FieldAppliedFiltersMap,
+    FiledAppliedFilterUpdater,
+    FieldName,
+    SearchFiltersContextType,
+    SearchFiltersProviderProps,
+} from './types';
 
 export const SearchFiltersContext = React.createContext<SearchFiltersContextType>({
-    getFacets: () => undefined,
     fields: [],
-    appliedFilters: [],
+
+    fieldToFacetStateMap: new Map(),
+
+    fieldToAppliedFiltersMap: new Map(),
+    updateFieldAppliedFilters: () => null,
+
+    filtersRenderer: DefaultFiltersRenderer,
 });
 
 export const useSearchFiltersContext = () => useContext(SearchFiltersContext);
@@ -23,11 +27,34 @@ export const SearchFiltersProvider = ({
     getFacets,
     fields,
     defaultAppliedFilters,
+    fieldToFacetStateMap,
+    filtersRenderer = DefaultFiltersRenderer,
 }: React.PropsWithChildren<SearchFiltersProviderProps>) => {
-    const [appliedFilters, setAppliedFilters] = useState<FacetFilterInput[]>(defaultAppliedFilters || []);
+    // const [appliedFiltersOld, setAppliedFiltersOld] = useState<FacetFilterInput[]>(defaultAppliedFilters || []);
+
+    // TODO: >>> add default value
+    const [fieldToAppliedFiltersMap, setFieldToAppliedFiltersMap] = useState<FieldAppliedFiltersMap>(new Map());
+
+    const applyFilter: FiledAppliedFilterUpdater = useCallback((fieldName, facetFilterInputs) => {
+        setFieldToAppliedFiltersMap((prevAppliedFilters) => {
+            const facetFIlterInputsWithValues = facetFilterInputs
+                .filter((input) => input.field === fieldName)
+                .filter((input) => input.values && input.values.length > 0);
+
+            return new Map(prevAppliedFilters.set(fieldName, facetFIlterInputsWithValues));
+        });
+    }, []);
 
     return (
-        <SearchFiltersContext.Provider value={{ getFacets, fields, appliedFilters }}>
+        <SearchFiltersContext.Provider
+            value={{
+                fieldToFacetStateMap,
+                fields,
+                fieldToAppliedFiltersMap,
+                filtersRenderer,
+                updateFieldAppliedFilters: applyFilter,
+            }}
+        >
             {children}
         </SearchFiltersContext.Provider>
     );
