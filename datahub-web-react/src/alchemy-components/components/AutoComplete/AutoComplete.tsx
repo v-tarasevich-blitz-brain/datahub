@@ -1,5 +1,5 @@
 import { AutoComplete as AntdAutoComplete } from 'antd';
-import React, { createContext, Ref, RefObject, useRef, useState } from 'react';
+import React, { createContext, Ref, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { colors, spacing } from '@src/alchemy-components/theme';
 import radius from '@src/alchemy-components/theme/foundations/radius';
 import { BOX_SHADOW, ChildrenWrapper, DropdownWrapper } from './components';
@@ -27,18 +27,32 @@ export default function AutoComplete({
     ...props
 }: React.PropsWithChildren<AutoCompleteProps>) {
     const [internalOpen, setInternalOpen] = useState<boolean>(false);
+    const { open, onDropdownVisibleChange } = props;
 
+    useEffect(() => {
+        if (open !== undefined) setInternalOpen(open);
+    }, [open]);
 
-    const { open } = props;
-
-
+    const updateOpenState = useCallback((isOpen) => {
+        if (open === undefined) setInternalOpen(isOpen);
+        // if (open !== undefined) setInternalOpen(open);
+        onDropdownVisibleChange?.(isOpen);
+    }, [open, onDropdownVisibleChange])
 
     const portalRef = useRef<HTMLDivElement>(null);
     const subPortalRef = useRef<HTMLDivElement>(null);
 
     console.log('>>> autocomplete', { portalRef: portalRef.current, subPortalRef: subPortalRef.current });
     return (
-        <ClickOutside onClickOutside={() => {setInternalOpen(false); console.log('>>> click outside')}} wrapperClassName='autocomplete'>
+        <ClickOutside
+            onClickOutside={() => {
+                updateOpenState(false);
+                // setInternalOpen(false);
+                // console.log('>>> click outside');
+                // props.onDropdownVisibleChange?.(false);
+            }}
+            wrapperClassName="autocomplete"
+        >
             {/* {createPortal(
                 <div id="autocompleteRefTest">
                     <div id="main" ref={portalRef} />
@@ -58,7 +72,9 @@ export default function AutoComplete({
                                 portalRef.current || document.body,
                             )} */}
                             <AutoCompleteContext.Provider value={{ portal: subPortalRef.current, test: 'testString2' }}>
-                                <DropdownWrapper className='autocomplete'>{props?.dropdownRender?.(menu) ?? menu}</DropdownWrapper>
+                                <DropdownWrapper className="autocomplete">
+                                    {props?.dropdownRender?.(menu) ?? menu}
+                                </DropdownWrapper>
                             </AutoCompleteContext.Provider>
                         </>
                     );
@@ -75,14 +91,14 @@ export default function AutoComplete({
                         : { borderRadius: radius.lg }),
                     ...(props?.dropdownStyle ?? {}),
                 }}
-                onClick={() => setInternalOpen(true)}
+                onClick={() => {updateOpenState(true)}}
                 // onBlur={(event) => {
                 //     console.log('>>> blur', event);
                 //     event.preventDefault();
                 //     event.stopPropagation();
                 // }}
             >
-                <ChildrenWrapper $open={internalOpen} $showWrapping={showWrapping} className='autocomplete'>
+                <ChildrenWrapper $open={internalOpen} $showWrapping={showWrapping} className="autocomplete">
                     {children}
                 </ChildrenWrapper>
             </AntdAutoComplete>

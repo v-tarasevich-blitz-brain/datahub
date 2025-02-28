@@ -340,8 +340,8 @@ export const SearchBar = ({
     const options = useMemo(() => {
         const autoCompleteOptions =
             showAutoCompleteResults && autoCompleteEntityOptions.length ? autoCompleteEntityOptions : emptyQueryOptions;
-        const quickFilterOptions = quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
         // const quickFilterOptions = quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
+        const quickFilterOptions = []; //quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
         const baseOptions: any[] = [...autoCompleteQueryOptions, ...quickFilterOptions, ...autoCompleteOptions];
 
         if (showViewAllResults) {
@@ -493,7 +493,7 @@ export const SearchBar = ({
                         } else {
                             // set timeout so that we allow search bar to grow in width and therefore allow autocomplete to grow
                             setTimeout(() => {
-                                // setIsDropdownVisible(isOpen);
+                                setIsDropdownVisible(isOpen);
                             }, 0);
                         }
                     }}

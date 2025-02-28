@@ -7,15 +7,21 @@ const Container = styled.div`
     width: fit-content;
 `;
 
-export default function TestField({fieldName}: {fieldName: string}) {
-    const { getFacetForField } = useSearchFiltersContext();
+interface TestFieldProps {
+    fieldName: string;
+    values?: string[];
+    onUpdate: (values: string[]) => void;
+}
+
+export default function TestField({fieldName, values, onUpdate}: TestFieldProps) {
+    const { getFacets } = useSearchFiltersContext();
 
     const [options, setOptions] = useState<SelectOption[]>([]);
 
-    const domainFacet = useMemo(() => getFacetForField(fieldName), [getFacetForField]);
+    const facet = useMemo(() => getFacets([fieldName])?.facets?.[0], [getFacets]);
 
     useEffect(() => {
-        const aggregations = domainFacet?.facet?.aggregations;
+        const aggregations = facet?.aggregations;
         if (aggregations) {
             setOptions(
                 aggregations.map((aggregation) => ({
@@ -24,13 +30,15 @@ export default function TestField({fieldName}: {fieldName: string}) {
                 })),
             );
         }
-    }, [domainFacet]);
+    }, [facet]);
 
-    console.log('>>> TestFIeld', { domainFacet, options });
+    console.log('>>> TestFIeld', { domainFacet: facet, options });
 
     return (
         // <Container>
             <SimpleSelect
+                // values={values}
+                onUpdate={onUpdate}
                 options={options}
                 isMultiSelect
                 showSearch
