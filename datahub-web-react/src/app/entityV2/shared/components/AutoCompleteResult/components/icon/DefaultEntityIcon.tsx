@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Image } from 'antd';
 import { Entity } from '@src/types.generated';
@@ -13,7 +13,9 @@ const ImageIcon = styled(Image)<{ $size: number }>`
     background-color: transparent;
 `;
 
-const Container = styled.div``;
+const Container = styled.div`
+    display: flex;
+`;
 
 const ICON_SIZE = 20;
 const SIBLING_ICON_SIZE = 16;
@@ -23,16 +25,18 @@ interface EntityIconRendererProps {
     size: number;
 }
 
-function EntityIconRenderer({ entity, size }: EntityIconRendererProps) {
+export function EntityIconRenderer({ entity, size }: EntityIconRendererProps) {
+    const [isBrokenPlatformLogoUrl, setIsBrokenPlatformLogoUrl] = useState<boolean>(false);
     const { entityRegistry, getGenericProperties, getPlatformLogoUrl, getPlatformName } = useEntityUtils();
 
     const properties = getGenericProperties(entity);
     const platformLogoUrl = getPlatformLogoUrl(entity, properties);
     const platformName = getPlatformName(entity, properties);
 
+
     return (
-        (platformLogoUrl && (
-            <ImageIcon preview={false} src={platformLogoUrl} alt={platformName || ''} $size={size} />
+        (platformLogoUrl && !isBrokenPlatformLogoUrl && (
+            <ImageIcon preview={false} src={platformLogoUrl} alt={platformName || ''} $size={size} onError={() => setIsBrokenPlatformLogoUrl(true)} />
         )) ||
         entityRegistry.getIcon(entity.type, size, IconStyleType.ACCENT)
     );

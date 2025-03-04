@@ -12,36 +12,13 @@ const Container = styled.div`
 `;
 
 export default function DefaultFiltersRenderer({ filters }: FiltersRendererProps) {
-    const {
-        fieldFacets,
-        fieldToFacetStateMap,
-        updateFieldAppliedFilters: applyFilter,
-        fieldToAppliedFiltersMap,
-    } = useSearchFiltersContext();
+    console.log('>>> filters', filters)
 
     return (
         <Container>
-            <TestField
-                fieldName="domains"
-                appliedFilters={fieldToAppliedFiltersMap.get('domains')}
-                onUpdate={(values) => applyFilter('domains', values)}
-                facetState={fieldToFacetStateMap.get('domains')}
-            />
-            <PlatformEntityFilter
-                fieldName="platform"
-                appliedFilters={fieldToAppliedFiltersMap.get('platform')}
-                onUpdate={(values) => applyFilter('platform', values)}
-                facetState={fieldToFacetStateMap.get('platform')}
-            />
-
             {filters.map((filter) => (
                 <React.Fragment key={filter.fieldName}>
-                    {filter.render({
-                        fieldName: filter.fieldName,
-                        facetState: fieldFacets?.get(filter.fieldName),
-
-                        // values:
-                    })}
+                    {filter.render(filter.props)}
                 </React.Fragment>
             ))}
         </Container>

@@ -1,4 +1,5 @@
-import { FacetFilterInput, FacetMetadata } from '@src/types.generated';
+import { SelectOption } from '@src/alchemy-components';
+import { Entity, FacetFilterInput, FacetMetadata } from '@src/types.generated';
 import React from 'react';
 
 export type FieldName = string;
@@ -10,13 +11,18 @@ export type FacetsGetter = (fieldNames: FieldName[]) => FieldToFacetStateMap | u
 
 export type FilterValue = string;
 
-export type FieldAppliedFiltersMap = Map<FieldName, FacetFilterInput[]>;
+export interface AppliedFieldFilterValue {
+    filters: FacetFilterInput[];
+    options?: SelectOption[];
+}
+
+export type FieldToAppliedFieldFiltersMap = Map<FieldName, AppliedFieldFilterValue>;
 
 export interface FilterRendererProps {
     fieldName: FieldName;
     facetState?: FeildFacetState;
-    appliedFilters?: FacetFilterInput[];
-    onUpdate?: (values: FacetFilterInput[]) => void;
+    appliedFilters?: AppliedFieldFilterValue;
+    onUpdate?: (value: AppliedFieldFilterValue) => void;
 }
 
 export type FilterRenderer = (props: FilterRendererProps) => React.ReactNode;
@@ -52,8 +58,8 @@ export type SearchFiltersContextType = {
     fieldToFacetStateMap: FieldToFacetStateMap
 
     // Internal state of applied filters
-    fieldToAppliedFiltersMap: FieldAppliedFiltersMap;
-    updateFieldAppliedFilters: FiledAppliedFilterUpdater;
+    fieldToAppliedFiltersMap: FieldToAppliedFieldFiltersMap;
+    updateFieldAppliedFilters: AppliedFieldFilterUpdater;
 
     // takes all filters and render them together
     filtersRenderer: FiltersRenderer;
@@ -63,6 +69,8 @@ export type SearchFiltersContextType = {
     getFacets?: FacetsGetter;
 };
 
+export type FiltersAppliedHandler = (appliedFilters: FieldToAppliedFieldFiltersMap) => void;
+
 // Context provider props
 export interface SearchFiltersProviderProps {
     fieldFacets?: FieldToFacetStateMap;
@@ -70,9 +78,16 @@ export interface SearchFiltersProviderProps {
     fields: FieldName[];
     defaultAppliedFilters?: FacetFilterInput[];
     filtersRenderer?: FiltersRenderer;
+    onFiltersApplied?: FiltersAppliedHandler;
 
     fieldToFacetStateMap: FieldToFacetStateMap
 }
 
 
-export type FiledAppliedFilterUpdater = (fieldName: FieldName, facetFilterInputs: FacetFilterInput[]) => void;
+export type AppliedFieldFilterUpdater = (fieldName: FieldName, value: AppliedFieldFilterValue) => void;
+
+
+
+export interface InternalRenderer {
+    fields: FieldName[];
+}

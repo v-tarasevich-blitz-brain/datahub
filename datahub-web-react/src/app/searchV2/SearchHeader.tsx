@@ -13,6 +13,7 @@ import NavBarToggler from '../homeV2/layout/navBarRedesign/NavBarToggler';
 import { REDESIGN_COLORS } from '../entityV2/shared/constants';
 import useSearchViewAll from './useSearchViewAll';
 import { useShowNavBarRedesign } from '../useShowNavBarRedesign';
+import { FiltersAppliedHandler } from './filtersPrototype/types';
 
 const getStyles = ($isShowNavBarRedesign?: boolean) => {
     return {
@@ -125,6 +126,7 @@ type Props = {
     suggestions: Array<AutoCompleteResultForEntity>;
     onSearch: (query: string) => void;
     onQueryChange: (query: string) => void;
+    onFilter?: FiltersAppliedHandler;
     entityRegistry: EntityRegistry;
 };
 
@@ -138,6 +140,7 @@ export const SearchHeader = ({
     onSearch,
     onQueryChange,
     entityRegistry,
+    onFilter,
 }: Props) => {
     const [, setIsSearchBarFocused] = useState(false);
     const appConfig = useAppConfig();
@@ -174,6 +177,7 @@ export const SearchHeader = ({
                             setIsSearchBarFocused={setIsSearchBarFocused}
                             viewsEnabled={viewsEnabled}
                             isShowNavBarRedesign={isShowNavBarRedesign}
+                            onFilter={onFilter}
                             combineSiblings
                             fixAutoComplete
                             showQuickFilters

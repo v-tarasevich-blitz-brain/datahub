@@ -25,7 +25,7 @@ function FieldFacetUpdater({ fieldName, query, onFieldFacetUpdated }: FieldFacet
         () =>
             Array.from(fieldToAppliedFiltersMap.entries())
                 .filter(([fieldNameKey, _]) => fieldNameKey !== fieldName)
-                .map(([_, value]) => value)
+                .map(([_, value]) => value.filters)
                 .flat(),
 
         [fieldName, fieldToAppliedFiltersMap],

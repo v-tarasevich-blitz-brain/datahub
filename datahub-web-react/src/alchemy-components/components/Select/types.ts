@@ -42,6 +42,7 @@ export interface SelectProps {
         variant: SelectLabelVariants;
         label: string;
     };
+    className?: string;
 }
 
 export interface SelectStyleProps {

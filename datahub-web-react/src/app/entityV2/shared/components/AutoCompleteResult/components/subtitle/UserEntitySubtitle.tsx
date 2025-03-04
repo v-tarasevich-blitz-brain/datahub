@@ -13,7 +13,7 @@ export default function UserEntitySubtitle({ entity }: EntitySubtitleProps) {
 
     return (
         <Text color="gray" size="sm">
-            @{userName}
+            {userName}
         </Text>
     );
 }

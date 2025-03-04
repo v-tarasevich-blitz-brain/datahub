@@ -34,6 +34,7 @@ import { AutoComplete } from '@src/alchemy-components/components/AutoComplete';
 import { useGetSearchResultsForMultipleQuery } from '@src/graphql/search.generated';
 import { SearchFiltersContext } from './filtersPrototype/SearchFiltersContext';
 import SearchFilters from './filtersPrototype/SearchFilters';
+import { FiltersAppliedHandler } from './filtersPrototype/types';
 
 const StyledAutoComplete = styled(AutoComplete)<{ $isShowNavBarRedesign?: boolean }>`
     width: 100%;
@@ -137,6 +138,14 @@ const SearchIcon = styled(SearchOutlined)<{ $isShowNavBarRedesign?: boolean }>`
     `}
 `;
 
+const SearchFitlersContainer = styled.div`
+    padding: 16px 8px;
+`;
+
+const DropdownContainer = styled.div`
+    overflow: auto;
+`
+
 const EXACT_AUTOCOMPLETE_OPTION_TYPE = 'exact_query';
 const RELEVANCE_QUERY_OPTION_TYPE = 'recommendation';
 
@@ -173,6 +182,7 @@ interface Props {
     textColor?: string;
     placeholderColor?: string;
     isShowNavBarRedesign?: boolean;
+    onFilter?: FiltersAppliedHandler;
 }
 
 const defaultProps = {
@@ -190,6 +200,7 @@ export const SearchBar = ({
     suggestions,
     onSearch,
     onQueryChange,
+    onFilter,
     entityRegistry,
     style,
     inputStyle,
@@ -257,7 +268,11 @@ export const SearchBar = ({
                     value: 'quick-filter-unique-key',
                     type: '',
                     // label: <QuickFilters searchQuery={searchQuery} setIsDropdownVisible={setIsDropdownVisible} />,
-                    label: <SearchFilters query={searchQuery ?? ''}/>,
+                    label: (
+                        <SearchFitlersContainer>
+                            <SearchFilters query={searchQuery ?? ''} />
+                        </SearchFitlersContainer>
+                    ),
                     style: { padding: '8px', cursor: 'auto', pointerEvents: 'all' },
                     // disabled: true,
                 },
@@ -441,13 +456,14 @@ export const SearchBar = ({
                     options={options}
                     filterOption={false}
                     dropdownRender={(props) => {
-                        console.log(props);
                         return (
-                            <div>
-                                <SearchFilters query={searchQuery ?? ''}/>
+                            <DropdownContainer>
+                                <SearchFitlersContainer>
+                                    <SearchFilters query={searchQuery ?? ''} onFiltersApplied={onFilter} />
+                                </SearchFitlersContainer>
                                 {props}
                                 <AutocompleteFooter />
-                            </div>
+                            </DropdownContainer>
                         );
                     }}
                     onSelect={(value, option) => {
@@ -489,6 +505,7 @@ export const SearchBar = ({
                     }}
                     onDropdownVisibleChange={(isOpen) => {
                         if (!isOpen) {
+                            // debugger;
                             setIsDropdownVisible(isOpen);
                         } else {
                             // set timeout so that we allow search bar to grow in width and therefore allow autocomplete to grow
@@ -508,10 +525,13 @@ export const SearchBar = ({
                         id={id}
                         style={viewsEnabled ? viewsEnabledStyle : style}
                         ref={searchBarWrapperRef}
-                        
                     >
                         <StyledSearchBar
-                            onFocusCapture={() => setIsDropdownVisible(true)}
+                            onFocusCapture={(event) => {
+                                if (event.target instanceof Element) {
+                                    if (event.target.closest('.autocomplete-click-outside')) return null;
+                                }
+                                setIsDropdownVisible(true)}}
                             bordered={false}
                             placeholder={placeholderText}
                             onPressEnter={() => {
@@ -522,7 +542,10 @@ export const SearchBar = ({
                             }}
                             style={{ ...inputStyle, color: '#fff' }}
                             value={searchQuery}
-                            onChange={(e) => {setSearchQuery(e.target.value); setIsDropdownVisible(true)}}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setIsDropdownVisible(true);
+                            }}
                             data-testid="search-input"
                             onFocus={handleFocus}
                             onBlur={handleBlur}
@@ -548,8 +571,8 @@ export const SearchBar = ({
                             $placeholderColor={placeholderColor}
                         />
                         {viewsEnabled && (
-                            <ViewSelectContainer id={V2_SEARCH_BAR_VIEWS}>
-                                <ViewSelect onOpenChange={() => setIsDropdownVisible(false)}/>
+                            <ViewSelectContainer id={V2_SEARCH_BAR_VIEWS} className="autocomplete-click-outside">
+                                <ViewSelect onOpenChange={() => setIsDropdownVisible(false)} />
                             </ViewSelectContainer>
                         )}
                     </AutoCompleteContainer>

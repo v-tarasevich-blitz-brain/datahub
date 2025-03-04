@@ -47,7 +47,7 @@ export default function SearchFiltersSection({
         }
     }, [availableFilters, loading, finalAvailableFilters]);
 
-    console.log('>>> activeFilters', activeFilters)
+    // console.log('>>> activeFilters', activeFilters)
 
     return (
         <Section

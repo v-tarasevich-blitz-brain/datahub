@@ -40,12 +40,14 @@ const IconWrapper = styled.div`
     }
 `;
 
-function PlatformLabel({ aggregation }: PlatformLabelProps) {
+function TagLabel({ aggregation }: PlatformLabelProps) {
     const entityRegistry = useEntityRegistryV2();
 
     const entity = aggregation.entity;
 
     const displayName = entity ? entityRegistry.getDisplayName(entity.type, entity) : '';
+
+    console.log('>>> TagLabel', {aggregation})
 
     return (
         <Container>
@@ -56,14 +58,14 @@ function PlatformLabel({ aggregation }: PlatformLabelProps) {
                 <Text type="span">{displayName}</Text>
             </IconAndNameContainer>
 
-            <Pill variant='filled' label={aggregation.count} />
+            <Pill label={aggregation.count} />
         </Container>
     );
 }
 
-export default function PlatformEntityFilter(props: FilterRendererProps) {
+export default function TagFilter(props: FilterRendererProps) {
     const aggregationMetadataToLabel = (aggregation: AggregationMetadata) => (
-        <PlatformLabel aggregation={aggregation} />
+        <TagLabel aggregation={aggregation} />
     );
 
     return <GenericEntityFilter {...props} aggregationMetadataToLabel={aggregationMetadataToLabel} />;

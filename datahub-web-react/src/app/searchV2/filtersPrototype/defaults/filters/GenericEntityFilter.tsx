@@ -1,11 +1,18 @@
-import { SelectOption, SimpleSelect } from '@src/alchemy-components';
+import { Select, SelectOption, SimpleSelect } from '@src/alchemy-components';
 import { AggregationMetadata, FilterOperator } from '@src/types.generated';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FilterRendererProps } from '../../types';
+import { FIELD_TO_FILTER_NAME_MAP } from './constants';
 
 interface GenericEntityFilterProps extends FilterRendererProps {
     aggregationMetadataToLabel: (aggregation: AggregationMetadata) => React.ReactNode;
 }
+
+const mergeOptions = (optionsA: SelectOption[], optionsB: SelectOption[]): SelectOption[] => {
+    const valuesOfOptionsB = optionsB.map((option) => option.value);
+
+    return [...optionsA.filter((option) => !valuesOfOptionsB.includes(option.value)), ...optionsB];
+};
 
 export default function GenericEntityFilter({
     fieldName,
@@ -21,41 +28,55 @@ export default function GenericEntityFilter({
     const values = useMemo(() => appliedFilters?.[0]?.values ?? [], [appliedFilters]);
 
     useEffect(() => {
+        let optionsToShow: SelectOption[] = [];
+
+        const optionsFromAppliedFilters = appliedFilters?.options;
+        if (optionsFromAppliedFilters) {
+            optionsToShow = mergeOptions(optionsToShow, optionsFromAppliedFilters);
+        }
+
         const aggregations = facetState?.facet?.aggregations;
         if (aggregations) {
-            setOptions(
-                aggregations.map((aggregation) => ({
-                    value: aggregation.value,
-                    label: aggregationMetadataToLabel(aggregation),
-                }))
-            );
+            const optionsFromAggregations = aggregations.map((aggregation) => ({
+                value: aggregation.value,
+                label: aggregationMetadataToLabel(aggregation),
+                entity: aggregation.entity,
+            }));
+
+            optionsToShow = mergeOptions(optionsToShow, optionsFromAggregations);
         }
-    }, [facetState?.facet?.aggregations, aggregationMetadataToLabel]);
+
+        setOptions(optionsToShow);
+    }, [facetState?.facet?.aggregations, aggregationMetadataToLabel, appliedFilters]);
 
     useEffect(() => {
-        const displayName = facetState?.facet?.displayName;
-        if (displayName) setLabel(displayName);
-    }, [facetState?.facet?.displayName]);
+        const filterName = FIELD_TO_FILTER_NAME_MAP.get(fieldName) ?? facetState?.facet?.displayName;
+        if (filterName) setLabel(filterName);
+    }, [facetState?.facet?.displayName, fieldName]);
 
     const onSelectUpdate = useCallback(
         (values: string[]) => {
-            onUpdate?.([
-                {
-                    field: fieldName,
-                    condition: FilterOperator.Equal,
-                    values: values,
-                },
-            ]);
+            onUpdate?.({
+                filters: [
+                    {
+                        field: fieldName,
+                        condition: FilterOperator.Equal,
+                        values: values,
+                    },
+                ],
+                options: options.filter((option) => values.includes(option.value)),
+            });
         },
         [onUpdate],
     );
 
-    console.log('>>> GenericEntityFilter', {options, facetState})
+    // console.log('>>> GenericEntityFilter', {options, facetState})
 
     return (
-        <SimpleSelect
+        <Select
             // TODO: >>> implement filter
             searchFilter={(options) => options}
+            // showSelectAll
             values={values}
             onUpdate={onSelectUpdate}
             options={options}

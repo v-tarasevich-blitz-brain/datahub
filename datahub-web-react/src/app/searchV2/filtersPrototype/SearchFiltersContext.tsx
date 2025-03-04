@@ -1,9 +1,9 @@
 import { FacetFilterInput, FilterOperator } from '@src/types.generated';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import DefaultFiltersRenderer from './defaults/DefaultFiltersRenderer';
 import {
-    FieldAppliedFiltersMap,
-    FiledAppliedFilterUpdater,
+    FieldToAppliedFieldFiltersMap,
+    AppliedFieldFilterUpdater,
     FieldName,
     SearchFiltersContextType,
     SearchFiltersProviderProps,
@@ -29,21 +29,29 @@ export const SearchFiltersProvider = ({
     defaultAppliedFilters,
     fieldToFacetStateMap,
     filtersRenderer = DefaultFiltersRenderer,
+    onFiltersApplied,
 }: React.PropsWithChildren<SearchFiltersProviderProps>) => {
     // const [appliedFiltersOld, setAppliedFiltersOld] = useState<FacetFilterInput[]>(defaultAppliedFilters || []);
 
     // TODO: >>> add default value
-    const [fieldToAppliedFiltersMap, setFieldToAppliedFiltersMap] = useState<FieldAppliedFiltersMap>(new Map());
+    const [fieldToAppliedFiltersMap, setFieldToAppliedFiltersMap] = useState<FieldToAppliedFieldFiltersMap>(new Map());
 
-    const applyFilter: FiledAppliedFilterUpdater = useCallback((fieldName, facetFilterInputs) => {
+    const applyFilter: AppliedFieldFilterUpdater = useCallback((fieldName, value) => {
         setFieldToAppliedFiltersMap((prevAppliedFilters) => {
-            const facetFIlterInputsWithValues = facetFilterInputs
+            const filters = value.filters
                 .filter((input) => input.field === fieldName)
                 .filter((input) => input.values && input.values.length > 0);
 
-            return new Map(prevAppliedFilters.set(fieldName, facetFIlterInputsWithValues));
+            return new Map(
+                prevAppliedFilters.set(fieldName, {
+                    filters,
+                    options: value.options,
+                }),
+            );
         });
     }, []);
+
+    useEffect(() => onFiltersApplied?.(fieldToAppliedFiltersMap), [onFiltersApplied, fieldToAppliedFiltersMap]);
 
     return (
         <SearchFiltersContext.Provider

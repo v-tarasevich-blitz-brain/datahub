@@ -63,20 +63,21 @@ export const Container = styled.div<ContainerProps>(({ size, width, $selectLabel
         width: width === 'fit-content' ? 'fit-content' : width === 'full' ? '100%' : `${width}px`,
         gap: '4px',
         transition: sharedTransition,
-        minWidth: getMinWidth(),
+        // minWidth: getMinWidth(),
         ...getSelectFontStyles(size),
         ...inputValueTextStyles(size),
     };
 });
 
 export const DropdownContainer = styled.div({
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
+    // position: 'absolute',
+    // top: '100%',
+    // left: 0,
+    // right: 0,
     borderRadius: radius.md,
     background: colors.white,
-    zIndex: 1050, // autocomplete z-index
+    zIndex: 950,
+    // zIndex: 1050, // autocomplete z-index
     transition: sharedTransition,
     boxShadow: shadows.dropdown,
     padding: spacing.xsm,
@@ -84,7 +85,7 @@ export const DropdownContainer = styled.div({
     flexDirection: 'column',
     gap: '8px',
     marginTop: '4px',
-    maxHeight: '360px',
+    // maxHeight: '360px',
     overflow: 'auto',
     width: 'fit-content',
     minWidth: '250px',
@@ -93,6 +94,9 @@ export const DropdownContainer = styled.div({
 
 
 export const SearchInputContainer = styled.div({
+    // position: 'sticky',
+    // top: 0,
+    // background: colors.white,
     position: 'relative',
     width: '100%',
     display: 'flex',
@@ -156,11 +160,14 @@ export const FooterBase = styled.div({
 export const OptionList = styled.div({
     display: 'flex',
     flexDirection: 'column' as const,
+    maxHeight: '300px',
+    overflow: 'auto',
 });
 
 export const LabelContainer = styled.div({
     display: 'flex',
     justifyContent: 'space-between',
+    gap: '8px',
     width: '100%',
 });
 
@@ -211,17 +218,6 @@ export const SelectLabel = styled.label({
     ...formLabelTextStyles,
     marginBottom: spacing.xxsm,
     textAlign: 'left',
-});
-
-export const StyledCancelButton = styled(Button)({
-    backgroundColor: colors.violet[100],
-    color: colors.violet[500],
-    borderColor: colors.violet[100],
-
-    '&:hover': {
-        backgroundColor: colors.violet[200],
-        borderColor: colors.violet[200],
-    },
 });
 
 export const StyledIcon = styled(Icon)({
