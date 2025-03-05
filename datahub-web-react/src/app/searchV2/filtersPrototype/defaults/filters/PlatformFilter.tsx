@@ -1,14 +1,13 @@
-import { AggregationMetadata } from '@src/types.generated';
+import { Text } from '@src/alchemy-components';
+import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';
+import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
+import { Entity } from '@src/types.generated';
+import styled from 'styled-components';
 import { FilterRendererProps } from '../../types';
 import GenericEntityFilter from './GenericEntityFilter';
-import React from 'react';
-import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';
-import styled from 'styled-components';
-import { Pill, Text } from '@src/alchemy-components';
-import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
 
 interface PlatformLabelProps {
-    aggregation: AggregationMetadata;
+    entity: Entity;
 }
 
 const Container = styled.div`
@@ -40,31 +39,25 @@ const IconWrapper = styled.div`
     }
 `;
 
-function PlatformLabel({ aggregation }: PlatformLabelProps) {
+function PlatformLabel({ entity }: PlatformLabelProps) {
     const entityRegistry = useEntityRegistryV2();
 
-    const entity = aggregation.entity;
-
-    const displayName = entity ? entityRegistry.getDisplayName(entity.type, entity) : '';
+    const displayName = entityRegistry.getDisplayName(entity.type, entity);
 
     return (
         <Container>
             <IconAndNameContainer>
                 <IconWrapper>
-                    {aggregation.entity && <EntityIconRenderer entity={aggregation.entity} size={16} />}
+                    <EntityIconRenderer entity={entity} size={16} />
                 </IconWrapper>
                 <Text type="span">{displayName}</Text>
             </IconAndNameContainer>
-
-            {/* <Pill variant='filled' label={aggregation.count} /> */}
         </Container>
     );
 }
 
 export default function PlatformEntityFilter(props: FilterRendererProps) {
-    const aggregationMetadataToLabel = (aggregation: AggregationMetadata) => (
-        <PlatformLabel aggregation={aggregation} />
-    );
+    const renderEntity = (entity: Entity) => <PlatformLabel entity={entity} />;
 
-    return <GenericEntityFilter {...props} aggregationMetadataToLabel={aggregationMetadataToLabel} />;
+    return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
 }

@@ -15,7 +15,7 @@ export interface SelectOption {
 export type SelectLabelVariants = 'default' | 'labeled';
 
 export interface SelectProps {
-    searchFilter?: (options: SelectOption[], query: string) => SelectOption[];
+    searchFilter?: (query: string, options: SelectOption[]) => SelectOption[];
     options: SelectOption[];
     label?: string;
     values?: string[];

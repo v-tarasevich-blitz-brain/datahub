@@ -1,4 +1,4 @@
-import { AggregationMetadata } from '@src/types.generated';
+import { AggregationMetadata, Entity } from '@src/types.generated';
 import { FilterRendererProps } from '../../types';
 import GenericEntityFilter from './GenericEntityFilter';
 import React from 'react';
@@ -8,7 +8,7 @@ import { Text } from '@src/alchemy-components';
 import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
 
 interface PlatformLabelProps {
-    aggregation: AggregationMetadata;
+    entity: Entity;
 }
 
 const Container = styled.div`
@@ -30,34 +30,25 @@ const IconWrapper = styled.div`
     }
 `;
 
-function EntityTypeLabel({ aggregation }: PlatformLabelProps) {
+function EntityTypeLabel({ entity }: PlatformLabelProps) {
     const entityRegistry = useEntityRegistryV2();
-
-    const entity = aggregation.entity;
-
     const displayName = entity ? entityRegistry.getDisplayName(entity.type, entity) : '';
 
-    // entityRegistry
-
-    console.log('>>> EntityTypeLabel', {aggregation})
 
     return (
         <Container>
             <IconWrapper>
-                {aggregation.entity && <EntityIconRenderer entity={aggregation.entity} size={16} />}
+                {entity && <EntityIconRenderer entity={entity} size={16} />}
             </IconWrapper>
             <Text type="span">{displayName}</Text>
-            <Text type="span" size="sm" color="gray">
-                {aggregation.count}
-            </Text>
         </Container>
     );
 }
 
 export default function EntityTypeFilter(props: FilterRendererProps) {
-    const aggregationMetadataToLabel = (aggregation: AggregationMetadata) => (
-        <EntityTypeLabel aggregation={aggregation} />
+    const aggregationMetadataToLabel = (entity: Entity) => (
+        <EntityTypeLabel entity={entity} />
     );
 
-    return <GenericEntityFilter {...props} aggregationMetadataToLabel={aggregationMetadataToLabel} />;
+    return <GenericEntityFilter {...props} renderEntity={aggregationMetadataToLabel} />;
 }

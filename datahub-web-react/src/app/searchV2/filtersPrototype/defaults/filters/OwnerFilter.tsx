@@ -1,4 +1,4 @@
-import { AggregationMetadata, CorpUser, EntityType } from '@src/types.generated';
+import { AggregationMetadata, CorpUser, Entity, EntityType } from '@src/types.generated';
 import { FilterRendererProps } from '../../types';
 import GenericEntityFilter from './GenericEntityFilter';
 import React from 'react';
@@ -10,7 +10,7 @@ import UserEntityIcon from '@src/app/entityV2/shared/components/AutoCompleteResu
 import EntityIcon from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/EntityIcon';
 
 interface PlatformLabelProps {
-    aggregation: AggregationMetadata;
+    entity: Entity;
 }
 
 const Container = styled.div`
@@ -48,18 +48,18 @@ const TitleContainer = styled.div`
     /* gap: 8px; */
 `;
 
-function OwnerLabel({ aggregation }: PlatformLabelProps) {
+function OwnerLabel({ entity }: PlatformLabelProps) {
     const entityRegistry = useEntityRegistryV2();
 
-    const entity = aggregation.entity;
-
-    const displayName = entity ? entityRegistry.getDisplayName(entity.type, entity) : '';
-    const subtitle = entity?.type === EntityType.CorpUser ? (entity as CorpUser)?.properties?.email : undefined;
+    const displayName = entityRegistry.getDisplayName(entity.type, entity);
+    const subtitle = entity.type === EntityType.CorpUser ? (entity as CorpUser)?.properties?.email : undefined;
 
     return (
         <Container>
             <IconAndNameContainer>
-                <IconWrapper>{aggregation.entity && <EntityIcon entity={aggregation.entity} />}</IconWrapper>
+                <IconWrapper>
+                    <EntityIcon entity={entity} />
+                </IconWrapper>
                 <TitleContainer>
                     <Text type="div">{displayName}</Text>
                     {subtitle && (
@@ -69,14 +69,12 @@ function OwnerLabel({ aggregation }: PlatformLabelProps) {
                     )}
                 </TitleContainer>
             </IconAndNameContainer>
-
-            {/* <Pill label={aggregation.count} /> */}
         </Container>
     );
 }
 
 export default function OwnerFilter(props: FilterRendererProps) {
-    const aggregationMetadataToLabel = (aggregation: AggregationMetadata) => <OwnerLabel aggregation={aggregation} />;
+    const renderEntity = (entity: Entity) => <OwnerLabel entity={entity} />;
 
-    return <GenericEntityFilter {...props} aggregationMetadataToLabel={aggregationMetadataToLabel} />;
+    return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
 }

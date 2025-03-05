@@ -1,21 +1,20 @@
 import TagLink from '@src/app/sharedV2/tags/TagLink';
-import { AggregationMetadata, Tag } from '@src/types.generated';
+import { Entity, Tag } from '@src/types.generated';
 import { FilterRendererProps } from '../../types';
 import GenericEntityFilter from './GenericEntityFilter';
 
 interface PlatformLabelProps {
-    aggregation: AggregationMetadata;
+    entity: Entity;
 }
 
-function TagLabel({ aggregation }: PlatformLabelProps) {
-    if (!aggregation.entity) return null;
-    const tag = aggregation.entity as Tag;
+function TagLabel({ entity }: PlatformLabelProps) {
+    const tag = entity as Tag;
 
     return <TagLink tag={tag} enableTooltip={false} enableDrawer={false} />;
 }
 
 export default function TagFilter(props: FilterRendererProps) {
-    const aggregationMetadataToLabel = (aggregation: AggregationMetadata) => <TagLabel aggregation={aggregation} />;
+    const renderEntity = (entity: Entity) => <TagLabel entity={entity} />;
 
-    return <GenericEntityFilter {...props} aggregationMetadataToLabel={aggregationMetadataToLabel} />;
+    return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
 }

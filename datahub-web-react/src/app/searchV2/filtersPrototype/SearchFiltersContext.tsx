@@ -17,6 +17,7 @@ export const SearchFiltersContext = React.createContext<SearchFiltersContextType
     fieldToAppliedFiltersMap: new Map(),
     updateFieldAppliedFilters: () => null,
 
+    
     filtersRenderer: DefaultFiltersRenderer,
 });
 
@@ -46,6 +47,7 @@ export const SearchFiltersProvider = ({
                 prevAppliedFilters.set(fieldName, {
                     filters,
                     options: value.options,
+                    aggregations: value.aggregations,
                 }),
             );
         });

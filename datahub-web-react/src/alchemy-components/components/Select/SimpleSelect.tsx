@@ -127,7 +127,7 @@ export const SimpleSelect = ({
 
     const filteredOptions = useMemo(() => {
         if (searchFilter) {
-            return searchFilter(options, searchQuery);
+            return searchFilter(searchQuery, options);
         }
 
         return options.filter((option) => {

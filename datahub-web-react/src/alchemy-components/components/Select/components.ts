@@ -167,6 +167,7 @@ export const OptionList = styled.div({
 export const LabelContainer = styled.div({
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'center',
     gap: '8px',
     width: '100%',
 });
