@@ -1,5 +1,5 @@
 import { AggregationMetadata, Entity } from '@src/types.generated';
-import { FilterRendererProps } from '../../types';
+import { FieldFilterComponentProps } from '../../types';
 import GenericEntityFilter from './entityFilters/GenericEntityFilter';
 import React, { memo, useCallback } from 'react';
 import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';
@@ -42,7 +42,7 @@ function EntityTypeLabel({ entity }: PlatformLabelProps) {
     );
 }
 
-export default function EntityTypeFilter(props: FilterRendererProps) {
+export default function EntityTypeFilter(props: FieldFilterComponentProps) {
     const aggregationMetadataToLabel = useCallback((entity: Entity) => <EntityTypeLabel entity={entity} />, []);
 
     return <GenericEntityFilter {...props} renderEntity={aggregationMetadataToLabel} />;

@@ -1,23 +1,23 @@
 import { FacetMetadata } from '@src/types.generated';
 import React from 'react';
-import { FieldName, FilterRenderer } from './types';
+import { FieldName, FieldFilterComponent } from './types';
 
 
 // type FieldName = string;
 // type FieldFilterRenderer = (props: RendererProps) => React.ReactNode;
 
 class FilterRegistry {
-    registry: Map<string, FilterRenderer> = new Map<FieldName, FilterRenderer>();
+    registry: Map<string, FieldFilterComponent> = new Map<FieldName, FieldFilterComponent>();
 
-    registerRenderer(fieldName: FieldName, renderer: FilterRenderer) {
-        this.registry.set(fieldName, renderer);
+    registerRenderer(fieldName: FieldName, component: FieldFilterComponent) {
+        this.registry.set(fieldName, component);
     }
 
     hasRenderer(fieldName: FieldName): boolean {
         return this.registry.has(fieldName)
     }
 
-    getRenderer(fieldName: FieldName): FilterRenderer | undefined {
+    getRenderer(fieldName: FieldName): FieldFilterComponent | undefined {
         return this.registry.get(fieldName)
     }
 }

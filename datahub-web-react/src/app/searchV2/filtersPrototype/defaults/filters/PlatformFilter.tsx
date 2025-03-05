@@ -3,7 +3,7 @@ import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoComp
 import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
 import { Entity } from '@src/types.generated';
 import styled from 'styled-components';
-import { FilterRendererProps } from '../../types';
+import { FieldFilterComponentProps } from '../../types';
 import GenericEntityFilter from './entityFilters/GenericEntityFilter';
 import { memo, useCallback } from 'react';
 
@@ -57,7 +57,7 @@ function PlatformLabel({ entity }: PlatformLabelProps) {
     );
 }
 
-export default function PlatformEntityFilter(props: FilterRendererProps) {
+export default function PlatformEntityFilter(props: FieldFilterComponentProps) {
     const renderEntity = useCallback((entity: Entity) => <PlatformLabel entity={entity} />, []);
 
     return <GenericEntityFilter {...props} renderEntity={renderEntity} />;

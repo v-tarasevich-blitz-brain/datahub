@@ -19,7 +19,7 @@ export interface AppliedFieldFilterValue {
 
 export type FieldToAppliedFieldFiltersMap = Map<FieldName, AppliedFieldFilterValue>;
 
-export interface FilterRendererProps {
+export interface FieldFilterComponentProps {
     fieldName: FieldName;
     facetState?: FeildFacetState;
     appliedFilters?: AppliedFieldFilterValue;
@@ -27,12 +27,12 @@ export interface FilterRendererProps {
 }
 
 // export type FilterRenderer = (props: FilterRendererProps) => React.ReactNode;
-export type FilterRenderer = React.FC<FilterRendererProps>;
+export type FieldFilterComponent = React.FC<FieldFilterComponentProps>;
 
 export interface Filter {
     fieldName: FieldName;
-    props: FilterRendererProps;
-    component: FilterRenderer;
+    props: FieldFilterComponentProps;
+    component: FieldFilterComponent;
 }
 
 export interface FiltersRendererProps {

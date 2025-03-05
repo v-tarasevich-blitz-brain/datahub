@@ -1,13 +1,13 @@
 import { Select, SelectOption, SimpleSelect } from '@src/alchemy-components';
 import { AggregationMetadata, Entity, EntityType, FilterOperator } from '@src/types.generated';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { FilterRendererProps } from '../../../types';
+import { FieldFilterComponentProps } from '../../../types';
 import { FIELD_TO_FILTER_NAME_MAP } from '../constants';
 import { useGetAutoCompleteMultipleResultsLazyQuery } from '@src/graphql/search.generated';
 import useConvertEntitiesToOptions from './hooks/useEntitiesToOptions';
 import { EntitySelectOption } from './types';
 
-interface GenericEntityFilterProps extends FilterRendererProps {
+interface GenericEntityFilterProps extends FieldFilterComponentProps {
     renderEntity: (entity: Entity) => React.ReactNode;
 }
 
