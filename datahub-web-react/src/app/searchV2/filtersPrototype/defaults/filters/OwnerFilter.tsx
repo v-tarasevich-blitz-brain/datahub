@@ -70,7 +70,7 @@ function OwnerLabel({ aggregation }: PlatformLabelProps) {
                 </TitleContainer>
             </IconAndNameContainer>
 
-            <Pill label={aggregation.count} />
+            {/* <Pill label={aggregation.count} /> */}
         </Container>
     );
 }

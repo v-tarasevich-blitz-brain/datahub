@@ -32,6 +32,7 @@ export default function GenericEntityFilter({
 
         const optionsFromAppliedFilters = appliedFilters?.options;
         if (optionsFromAppliedFilters) {
+            console.log('>>> optionsFromAppliedFilters', fieldName, optionsFromAppliedFilters)
             optionsToShow = mergeOptions(optionsToShow, optionsFromAppliedFilters);
         }
 

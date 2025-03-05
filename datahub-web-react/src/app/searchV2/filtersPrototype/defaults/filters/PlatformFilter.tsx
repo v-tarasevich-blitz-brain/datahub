@@ -56,7 +56,7 @@ function PlatformLabel({ aggregation }: PlatformLabelProps) {
                 <Text type="span">{displayName}</Text>
             </IconAndNameContainer>
 
-            <Pill variant='filled' label={aggregation.count} />
+            {/* <Pill variant='filled' label={aggregation.count} /> */}
         </Container>
     );
 }
