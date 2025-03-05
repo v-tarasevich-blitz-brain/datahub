@@ -65,8 +65,8 @@ const StyledDropdown = styled(Dropdown)({
     minWidth: '250px',
 });
 
-export const SimpleSelect = ({
-    options = selectDefaults.options,
+export const SimpleSelect = <OptionType extends SelectOption>({
+    options = [],
     label = selectDefaults.label,
     values = [],
     initialValues,
@@ -90,7 +90,7 @@ export const SimpleSelect = ({
     searchFilter,
     className,
     ...props
-}: SelectProps) => {
+}: SelectProps<OptionType>) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [selectedValues, setSelectedValues] = useState<string[]>(initialValues || values);
@@ -135,7 +135,7 @@ export const SimpleSelect = ({
                 return option.label.toLowerCase().includes(searchQuery.toLowerCase());
             }
 
-            return option?.filter?.(option, searchQuery) ?? false;
+            return true;
         });
     }, [options, searchQuery, searchFilter]);
 

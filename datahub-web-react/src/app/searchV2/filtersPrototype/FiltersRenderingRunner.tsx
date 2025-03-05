@@ -1,10 +1,9 @@
-import { useMemo } from 'react';
-import PlatformEntityFilter from './defaults/filters/PlatformFilter';
+import { memo, useMemo } from 'react';
 import filterRegistry from './FilterRegistry';
 import { useSearchFiltersContext } from './SearchFiltersContext';
 import { Filter, InternalRenderer } from './types';
 
-export default function FiltersRenderingRunner({ fields }: InternalRenderer) {
+export default memo(function FiltersRenderingRunner({ fields }: InternalRenderer) {
     const { filtersRenderer, fieldToFacetStateMap, updateFieldAppliedFilters, fieldToAppliedFiltersMap } =
         useSearchFiltersContext();
 
@@ -18,10 +17,10 @@ export default function FiltersRenderingRunner({ fields }: InternalRenderer) {
                     onUpdate: (values) => updateFieldAppliedFilters(field, values),
                     facetState: fieldToFacetStateMap.get(field),
                 },
-                render: filterRegistry.getRenderer(field) || (() => null),
+                component: filterRegistry.getRenderer(field) || (() => null),
             })),
         [fields, fieldToFacetStateMap, updateFieldAppliedFilters, fieldToAppliedFiltersMap],
     );
 
     return <>{filtersRenderer({ filters })}</>;
-}
+});

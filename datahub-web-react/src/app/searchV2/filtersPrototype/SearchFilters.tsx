@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import DynamicFacetsUpdater from './defaults/DynamicFacetsUpdater';
-import FiltersRenderingRunner from './FiltersRenderer';
+import FiltersRenderingRunner from './FiltersRenderingRunner';
 import { SearchFiltersProvider } from './SearchFiltersContext';
 import { FieldToFacetStateMap, FiltersAppliedHandler } from './types';
 import filterRegistry from './FilterRegistry';
@@ -30,8 +30,8 @@ filterRegistry.registerRenderer(TAGS_FILTER_NAME, TagFilter);
 filterRegistry.registerRenderer(DOMAINS_FILTER_NAME, PlatformEntityFilter);
 
 export default function SearchFilters({ query, onFiltersApplied }: SearchFiltersProps) {
-    // TODO: >>> pass field through props
-    const fields = [PLATFORM_FILTER_NAME, ENTITY_SUB_TYPE_FILTER_NAME, OWNERS_FILTER_NAME, TAGS_FILTER_NAME, DOMAINS_FILTER_NAME];
+    // TODO:: pass field through props
+    const fields = useMemo(() => [PLATFORM_FILTER_NAME, ENTITY_SUB_TYPE_FILTER_NAME, OWNERS_FILTER_NAME, TAGS_FILTER_NAME, DOMAINS_FILTER_NAME], []);
     const [fieldToFacetStateMap, setFieldToFacetStateMap] = useState<FieldToFacetStateMap>(new Map());
 
     const wrappedQuery = useMemo(() => {

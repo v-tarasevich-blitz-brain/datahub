@@ -139,7 +139,7 @@ export const SearchablePage = ({ children }: Props) => {
 
 
     const autoCompleteWithFilters = debounce((query: string) =>{
-        // TODO: >>> show initial state (with empty request)?
+        // TODO:: show initial state (with empty request)?
         if (query.trim() === '') return null;
 
 

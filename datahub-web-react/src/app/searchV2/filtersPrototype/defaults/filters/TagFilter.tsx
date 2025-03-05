@@ -1,7 +1,8 @@
 import TagLink from '@src/app/sharedV2/tags/TagLink';
 import { Entity, Tag } from '@src/types.generated';
 import { FilterRendererProps } from '../../types';
-import GenericEntityFilter from './GenericEntityFilter';
+import GenericEntityFilter from './entityFilters/GenericEntityFilter';
+import { memo, useCallback } from 'react';
 
 interface PlatformLabelProps {
     entity: Entity;
@@ -14,7 +15,7 @@ function TagLabel({ entity }: PlatformLabelProps) {
 }
 
 export default function TagFilter(props: FilterRendererProps) {
-    const renderEntity = (entity: Entity) => <TagLabel entity={entity} />;
+    const renderEntity = useCallback((entity: Entity) => <TagLabel entity={entity} />, []);
 
     return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
 }

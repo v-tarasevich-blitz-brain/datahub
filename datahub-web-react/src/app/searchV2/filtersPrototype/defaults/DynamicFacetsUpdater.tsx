@@ -1,6 +1,6 @@
 import { useAggregateAcrossEntitiesQuery } from '@src/graphql/search.generated';
 import { FacetFilterInput } from '@src/types.generated';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FeildFacetState, FieldName, FieldToFacetStateMap } from '../types';
 import { useSearchFiltersContext } from '../SearchFiltersContext';
 
@@ -36,7 +36,7 @@ function FieldFacetUpdater({ fieldName, query, onFieldFacetUpdated }: FieldFacet
             input: {
                 types: [],
                 query: query,
-                // TODO: >>> add dynamic condition
+                // TODO:: add dynamic condition
                 orFilters: [{ and: appliedFiltersExludingCurrentField }],
                 facets: [fieldName],
             },
@@ -53,7 +53,7 @@ function FieldFacetUpdater({ fieldName, query, onFieldFacetUpdated }: FieldFacet
     return null;
 }
 
-export default function DynamicFacetsUpdater({
+export default memo(function DynamicFacetsUpdater({
     fieldNames,
     query,
     onFieldFacetsUpdated,
@@ -80,4 +80,4 @@ export default function DynamicFacetsUpdater({
             ))}
         </>
     );
-}
+})

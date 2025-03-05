@@ -50,7 +50,7 @@ export default function TagLink({ tag, fontSize, enableTooltip = true, enableDra
                     <StyledTag
                         style={tagStyle}
                         onClick={() => showTagProfileDrawer(tag.urn)}
-                        // TODO: >>>? why urn in colorHash???
+                        // TODO::? why urn in colorHash???
                         $colorHash={tag.urn}
                         $color={tag.properties?.colorHex}
                         closable={false}

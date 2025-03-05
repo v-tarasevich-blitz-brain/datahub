@@ -8,15 +8,13 @@ export interface SelectOption {
     label: React.ReactNode;
     description?: string;
     icon?: React.ReactNode;
-    filter?: (option: SelectOption, query: string) => boolean;
-    [key: string]: any;
 }
 
 export type SelectLabelVariants = 'default' | 'labeled';
 
-export interface SelectProps {
-    searchFilter?: (query: string, options: SelectOption[]) => SelectOption[];
-    options: SelectOption[];
+export interface SelectProps<Option extends SelectOption = SelectOption> {
+    searchFilter?: (query: string, options: Option[]) => Option[];
+    options: Option[];
     label?: string;
     values?: string[];
     initialValues?: string[];

@@ -1,7 +1,7 @@
 import { AggregationMetadata, CorpUser, Entity, EntityType } from '@src/types.generated';
 import { FilterRendererProps } from '../../types';
-import GenericEntityFilter from './GenericEntityFilter';
-import React from 'react';
+import GenericEntityFilter from './entityFilters/GenericEntityFilter';
+import React, { memo, useCallback } from 'react';
 import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';
 import styled from 'styled-components';
 import { Pill, Text } from '@src/alchemy-components';
@@ -74,7 +74,7 @@ function OwnerLabel({ entity }: PlatformLabelProps) {
 }
 
 export default function OwnerFilter(props: FilterRendererProps) {
-    const renderEntity = (entity: Entity) => <OwnerLabel entity={entity} />;
+    const renderEntity = useCallback((entity: Entity) => <OwnerLabel entity={entity} />, []);
 
     return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
-}
+};

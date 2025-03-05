@@ -4,7 +4,8 @@ import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
 import { Entity } from '@src/types.generated';
 import styled from 'styled-components';
 import { FilterRendererProps } from '../../types';
-import GenericEntityFilter from './GenericEntityFilter';
+import GenericEntityFilter from './entityFilters/GenericEntityFilter';
+import { memo, useCallback } from 'react';
 
 interface PlatformLabelProps {
     entity: Entity;
@@ -57,7 +58,7 @@ function PlatformLabel({ entity }: PlatformLabelProps) {
 }
 
 export default function PlatformEntityFilter(props: FilterRendererProps) {
-    const renderEntity = (entity: Entity) => <PlatformLabel entity={entity} />;
+    const renderEntity = useCallback((entity: Entity) => <PlatformLabel entity={entity} />, []);
 
     return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
-}
+};

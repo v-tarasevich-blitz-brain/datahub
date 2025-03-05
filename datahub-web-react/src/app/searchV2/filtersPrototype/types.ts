@@ -1,5 +1,5 @@
 import { SelectOption } from '@src/alchemy-components';
-import { Entity, FacetFilterInput, FacetMetadata } from '@src/types.generated';
+import { AggregationMetadata, Entity, FacetFilterInput, FacetMetadata } from '@src/types.generated';
 import React from 'react';
 
 export type FieldName = string;
@@ -13,7 +13,8 @@ export type FilterValue = string;
 
 export interface AppliedFieldFilterValue {
     filters: FacetFilterInput[];
-    options?: SelectOption[];
+    // used to forcibly show options from applied filters
+    entities?: Entity[];
 }
 
 export type FieldToAppliedFieldFiltersMap = Map<FieldName, AppliedFieldFilterValue>;
@@ -25,12 +26,13 @@ export interface FilterRendererProps {
     onUpdate?: (value: AppliedFieldFilterValue) => void;
 }
 
-export type FilterRenderer = (props: FilterRendererProps) => React.ReactNode;
+// export type FilterRenderer = (props: FilterRendererProps) => React.ReactNode;
+export type FilterRenderer = React.FC<FilterRendererProps>;
 
 export interface Filter {
     fieldName: FieldName;
     props: FilterRendererProps;
-    render: FilterRenderer;
+    component: FilterRenderer;
 }
 
 export interface FiltersRendererProps {
@@ -49,7 +51,8 @@ export type FieldToFacetStateMap = Map<FieldName, FeildFacetState>;
 export type FieldFacetGetter = (fieldName: FieldName) => FeildFacetState | undefined;
 
 
-export type FiltersRenderer = (props: FiltersRendererProps) => React.ReactNode;
+// export type FiltersRenderer = (props: FiltersRendererProps) => React.ReactNode;
+export type FiltersRenderer = React.FC<FiltersRendererProps>;
 // Context
 export type SearchFiltersContextType = {
     fields: FieldName[];
@@ -62,9 +65,10 @@ export type SearchFiltersContextType = {
     updateFieldAppliedFilters: AppliedFieldFilterUpdater;
 
     // takes all filters and render them together
+    // filtersRenderer: FiltersRenderer;
     filtersRenderer: FiltersRenderer;
 
-    // TODO: >>> remove
+    // TODO:: remove
     fieldFacets?: FieldToFacetStateMap;
     getFacets?: FacetsGetter;
 };

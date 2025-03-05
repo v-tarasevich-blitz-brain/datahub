@@ -47,8 +47,8 @@ const SelectActionButtons = ({
     );
 };
 
-export const BasicSelect = ({
-    options = basicSelectDefaults.options,
+export const BasicSelect = <OptionType extends SelectOption>({
+    options = [],
     label = basicSelectDefaults.label,
     values = [],
     initialValues,
@@ -71,7 +71,7 @@ export const BasicSelect = ({
     selectLabelProps,
     className,
     ...props
-}: SelectProps) => {
+}: SelectProps<OptionType>) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [selectedValues, setSelectedValues] = useState<string[]>(initialValues || values);
@@ -89,17 +89,17 @@ export const BasicSelect = ({
         setAreAllSelected(tempValues.length === options.length);
     }, [options, tempValues]);
 
-    const filteredOptions = useMemo(
-        () =>
-            options.filter((option) => {
-                if (typeof option.label === 'string') {
-                    return option.label.toLowerCase().includes(searchQuery.toLowerCase());
-                }
+    const filteredOptions = useMemo(() => {
+        if (searchFilter) return searchFilter(searchQuery, options);
 
-                return option?.filter?.(option, searchQuery) ?? true;
-            }),
-        [options, searchQuery],
-    );
+        return options.filter((option) => {
+            if (typeof option.label === 'string') {
+                return option.label.toLowerCase().includes(searchQuery.toLowerCase());
+            }
+
+            return true;
+        });
+    }, [options, searchQuery, searchFilter]);
 
     const handleDocumentClick = useCallback((e: MouseEvent) => {
         if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
@@ -187,7 +187,7 @@ export const BasicSelect = ({
                 overlayClassName="autocomplete-click-outside-ignore"
                 onOpenChange={(open) => {
                     setIsOpen(open);
-                    console.log('>>> onOpenChange', open);
+                    // console.log('>>> onOpenChange', open);
                 }}
                 dropdownRender={() => {
                     return (

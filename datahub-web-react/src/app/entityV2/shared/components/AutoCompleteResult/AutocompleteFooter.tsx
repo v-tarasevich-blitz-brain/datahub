@@ -43,7 +43,7 @@ const KeySuggestion = styled.div`
 `;
 
 export default function AutocompleteFooter() {
-    // TODO: >>> add logic when item is selected
+    // TODO:: add logic when item is selected
     return (
         <Container>
             <KeySuggestion>

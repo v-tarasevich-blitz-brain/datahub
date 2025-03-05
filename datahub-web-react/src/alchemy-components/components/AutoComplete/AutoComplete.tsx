@@ -31,30 +31,30 @@ export default function AutoComplete({
     const { open } = props;
 
     useEffect(() => {
-        console.log('>>> Sync internal and open', {open})
+        // console.log('>>> Sync internal and open', {open})
         if (open !== undefined) setInternalOpen(open);
     }, [open]);
 
     const updateOpenState = useCallback(
         (isOpen) => {
             // if (isOpen === true) debugger;
-            console.log('>>> updateOpenState CALL', {isOpen, open});
+            // console.log('>>> updateOpenState CALL', {isOpen, open});
             if (open === undefined) setInternalOpen(isOpen);
             // if (open !== undefined) setInternalOpen(open);
-            console.trace('>>> updateOpenState trace');
+            // console.trace('>>> updateOpenState trace');
             onDropdownVisibleChange?.(isOpen);
         },
         [open, onDropdownVisibleChange],
     );
 
-    // const portalRef = useRef<HTMLDivElement>(null);
-    const subPortalRef = useRef<HTMLDivElement>(null);
+    // // const portalRef = useRef<HTMLDivElement>(null);
+    // const subPortalRef = useRef<HTMLDivElement>(null);
 
-    console.log('>>> autocomplete', { internalOpen, open });
+    // console.log('>>> autocomplete', { internalOpen, open });
     return (
         <ClickOutside
             onClickOutside={() => {
-                console.log('>>> onClickOutside CALL')
+                // console.log('>>> onClickOutside CALL')
                 updateOpenState(false);
             }}
             wrapperClassName="autocomplete"
@@ -68,13 +68,9 @@ export default function AutoComplete({
                 data-testid={dataTestId}
                 dropdownRender={(menu) => {
                     return (
-                        <>
-                            <AutoCompleteContext.Provider value={{ portal: subPortalRef.current, test: 'testString2' }}>
-                                <DropdownWrapper className="autocomplete-click-outside-ignore">
-                                    {props?.dropdownRender?.(menu) ?? menu}
-                                </DropdownWrapper>
-                            </AutoCompleteContext.Provider>
-                        </>
+                        <DropdownWrapper className="autocomplete-click-outside-ignore">
+                            {props?.dropdownRender?.(menu) ?? menu}
+                        </DropdownWrapper>
                     );
                 }}
                 dropdownAlign={{ ...(showWrapping ? DROPDOWN_ALIGN_WITH_WRAPPING : {}) }}
@@ -94,15 +90,15 @@ export default function AutoComplete({
                         if (!event.target.closest('.autocomplete-children')) return null;
 
                         if (event.target.closest('.autocomplete-click-outside,.view-select-popover')) {
-                            console.log('>>> updateOpenState true IGNORED');
+                            // console.log('>>> updateOpenState true IGNORED');
                             return null;
                         }
                     }
-                    console.log('>>> updateOpenState true');
+                    // console.log('>>> updateOpenState true');
                     updateOpenState(true);
                 }}
                 onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-                    console.log('>>> onKeyDown', event)
+                    // console.log('>>> onKeyDown', event)
                     if (event.key === 'Escape') {
                         if (internalOpen) updateOpenState(false);
                     }

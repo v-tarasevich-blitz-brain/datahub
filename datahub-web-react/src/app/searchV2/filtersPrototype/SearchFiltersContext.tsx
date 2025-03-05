@@ -17,7 +17,6 @@ export const SearchFiltersContext = React.createContext<SearchFiltersContextType
     fieldToAppliedFiltersMap: new Map(),
     updateFieldAppliedFilters: () => null,
 
-    
     filtersRenderer: DefaultFiltersRenderer,
 });
 
@@ -32,9 +31,7 @@ export const SearchFiltersProvider = ({
     filtersRenderer = DefaultFiltersRenderer,
     onFiltersApplied,
 }: React.PropsWithChildren<SearchFiltersProviderProps>) => {
-    // const [appliedFiltersOld, setAppliedFiltersOld] = useState<FacetFilterInput[]>(defaultAppliedFilters || []);
-
-    // TODO: >>> add default value
+    // TODO:: add default value
     const [fieldToAppliedFiltersMap, setFieldToAppliedFiltersMap] = useState<FieldToAppliedFieldFiltersMap>(new Map());
 
     const applyFilter: AppliedFieldFilterUpdater = useCallback((fieldName, value) => {
@@ -46,8 +43,7 @@ export const SearchFiltersProvider = ({
             return new Map(
                 prevAppliedFilters.set(fieldName, {
                     filters,
-                    options: value.options,
-                    aggregations: value.aggregations,
+                    entities: value.entities,
                 }),
             );
         });

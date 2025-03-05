@@ -1,9 +1,6 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import { FiltersRendererProps } from '../types';
-import { useSearchFiltersContext } from '../SearchFiltersContext';
-import TestField from '../TestField';
-import PlatformEntityFilter from './filters/PlatformFilter';
 
 const Container = styled.div`
     display: flex;
@@ -12,15 +9,16 @@ const Container = styled.div`
 `;
 
 export default function DefaultFiltersRenderer({ filters }: FiltersRendererProps) {
-    console.log('>>> filters', filters)
+    // console.log('>>> filters', filters)
+
+    console.log('>>> RENDER DefaultFiltersRenderer');
 
     return (
         <Container>
-            {filters.map((filter) => (
-                <React.Fragment key={filter.fieldName}>
-                    {filter.render(filter.props)}
-                </React.Fragment>
-            ))}
+            {filters.map((filter) => {
+                const FilterComponent = filter.component;
+                return <FilterComponent {...filter.props} />;
+            })}
         </Container>
     );
 }

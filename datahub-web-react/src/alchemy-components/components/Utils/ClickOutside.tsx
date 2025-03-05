@@ -19,30 +19,30 @@ export default function ClickOutside({ children, onClickOutside, overlayClassNam
         if (!isElement) return null;
 
 
-        console.log('>>> handleClickOutside', {event, ignoreSelector, outsideSelector});
+        // console.log('>>> handleClickOutside', {event, ignoreSelector, outsideSelector});
 
 
         if (ignoreSelector) {
             // debugger;
             if (!!event.target.closest(ignoreSelector)) {
-                console.log('>>> handleClickOutside ignored');
+                // console.log('>>> handleClickOutside ignored');
                 return null
             };
         }
 
-        console.log('>>> handleClickOutside not ignored');
+        // console.log('>>> handleClickOutside not ignored');
 
 
         if (outsideSelector) {
             if (!!event.target.closest(outsideSelector)) {
-                console.log('>>> handleClickOutside 1')
+                // console.log('>>> handleClickOutside 1')
                 onClickOutside();
 
             };
         } 
         
         if (!(wrapperRef.current as HTMLDivElement).contains((event.target as Node) || null)) {
-            console.log('>>> handleClickOutside 2')
+            // console.log('>>> handleClickOutside 2')
             onClickOutside();
         }
 
