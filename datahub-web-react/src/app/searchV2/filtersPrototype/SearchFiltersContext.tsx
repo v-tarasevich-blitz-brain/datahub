@@ -40,12 +40,7 @@ export const SearchFiltersProvider = ({
                 .filter((input) => input.field === fieldName)
                 .filter((input) => input.values && input.values.length > 0);
 
-            return new Map(
-                prevAppliedFilters.set(fieldName, {
-                    filters,
-                    entities: value.entities,
-                }),
-            );
+            return new Map(prevAppliedFilters.set(fieldName, { filters }));
         });
     }, []);
 

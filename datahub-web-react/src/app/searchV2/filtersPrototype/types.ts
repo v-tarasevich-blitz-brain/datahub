@@ -6,7 +6,7 @@ export type FieldName = string;
 export type FacetsGetterResponse = {
     facets?: FacetMetadata[] | undefined;
     loading?: boolean;
-}
+};
 export type FacetsGetter = (fieldNames: FieldName[]) => FieldToFacetStateMap | undefined;
 
 export type FilterValue = string;
@@ -14,7 +14,7 @@ export type FilterValue = string;
 export interface AppliedFieldFilterValue {
     filters: FacetFilterInput[];
     // used to forcibly show options from applied filters
-    entities?: Entity[];
+    // entities?: Entity[];
 }
 
 export type FieldToAppliedFieldFiltersMap = Map<FieldName, AppliedFieldFilterValue>;
@@ -39,17 +39,14 @@ export interface FiltersRendererProps {
     filters: Filter[];
 }
 
-
 export type FeildFacetState = {
     facet?: FacetMetadata | undefined;
     loading?: boolean;
-}
+};
 
 export type FieldToFacetStateMap = Map<FieldName, FeildFacetState>;
 
-
 export type FieldFacetGetter = (fieldName: FieldName) => FeildFacetState | undefined;
-
 
 // export type FiltersRenderer = (props: FiltersRendererProps) => React.ReactNode;
 export type FiltersRenderer = React.FC<FiltersRendererProps>;
@@ -58,7 +55,7 @@ export type SearchFiltersContextType = {
     fields: FieldName[];
 
     // State of facets for each field
-    fieldToFacetStateMap: FieldToFacetStateMap
+    fieldToFacetStateMap: FieldToFacetStateMap;
 
     // Internal state of applied filters
     fieldToAppliedFiltersMap: FieldToAppliedFieldFiltersMap;
@@ -84,13 +81,10 @@ export interface SearchFiltersProviderProps {
     filtersRenderer?: FiltersRenderer;
     onFiltersApplied?: FiltersAppliedHandler;
 
-    fieldToFacetStateMap: FieldToFacetStateMap
+    fieldToFacetStateMap: FieldToFacetStateMap;
 }
 
-
 export type AppliedFieldFilterUpdater = (fieldName: FieldName, value: AppliedFieldFilterValue) => void;
-
-
 
 export interface InternalRenderer {
     fields: FieldName[];

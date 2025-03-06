@@ -20,6 +20,7 @@ import {
 import { SelectSizeOptions } from '../types';
 import { NestedOption } from './NestedOption';
 import { SelectOption } from './types';
+import Dropdown from '../../Dropdown/Dropdown';
 
 const NO_PARENT_VALUE = 'no_parent_value';
 
@@ -113,7 +114,7 @@ const SelectActionButtons = ({
 
 export interface SelectProps {
     options: SelectOption[];
-    label: string;
+    label?: string;
     value?: string;
     initialValues?: SelectOption[];
     onCancel?: () => void;
@@ -127,7 +128,7 @@ export interface SelectProps {
     areParentsSelectable?: boolean;
     loadData?: (node: SelectOption) => void;
     onSearch?: (query: string) => void;
-    width?: number | 'full';
+    width?: number | 'full' | 'fit-content';
     height?: number;
     placeholder?: string;
     searchPlaceholder?: string;
@@ -192,23 +193,23 @@ export const NestedSelect = ({
 
     // TODO: handle searching inside of a nested component on the FE only
 
-    const handleDocumentClick = useCallback((e: MouseEvent) => {
-        if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
-            setIsOpen(false);
-        }
-    }, []);
+    // const handleDocumentClick = useCallback((e: MouseEvent) => {
+    //     if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
+    //         setIsOpen(false);
+    //     }
+    // }, []);
 
-    useEffect(() => {
-        document.addEventListener('click', handleDocumentClick);
-        return () => {
-            document.removeEventListener('click', handleDocumentClick);
-        };
-    }, [handleDocumentClick]);
+    // useEffect(() => {
+    //     document.addEventListener('click', handleDocumentClick);
+    //     return () => {
+    //         document.removeEventListener('click', handleDocumentClick);
+    //     };
+    // }, [handleDocumentClick]);
 
     const handleSelectClick = useCallback(() => {
-        if (!isDisabled && !isReadOnly) {
-            setIsOpen((prev) => !prev);
-        }
+        // if (!isDisabled && !isReadOnly) {
+        //     setIsOpen((prev) => !prev);
+        // }
     }, [isDisabled, isReadOnly]);
 
     const handleSearch = useCallback(
@@ -287,69 +288,82 @@ export const NestedSelect = ({
 
     return (
         <Container ref={selectRef} size={size || 'md'} width={props.width || 255}>
-            {label && <SelectLabel onClick={handleSelectClick}>{label}</SelectLabel>}
-            <SelectBase
-                isDisabled={isDisabled}
-                isReadOnly={isReadOnly}
-                isRequired={isRequired}
-                isOpen={isOpen}
-                onClick={handleSelectClick}
-                fontSize={size}
-                data-testid="nested-options-dropdown-container"
-                width={props.width}
-                {...props}
+            <Dropdown
+                open={isOpen}
+                overlayClassName="autocomplete-click-outside-ignore"
+                onOpenChange={(open) => {
+                    setIsOpen(open);
+                    // console.log('>>> onOpenChange', open);
+                }}
+                dropdownRender={() => {
+                    return (
+                        <DropdownContainer style={{ maxHeight: height, overflow: 'auto' }}>
+                            {showSearch && (
+                                <SearchInputContainer>
+                                    <SearchInput
+                                        type="text"
+                                        placeholder={searchPlaceholder || 'Search...'}
+                                        value={searchQuery}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                        style={{ fontSize: size || 'md', width: '100%' }}
+                                    />
+                                    <SearchIcon icon="Search" size={size} color="gray" />
+                                </SearchInputContainer>
+                            )}
+                            <OptionList>
+                                {rootOptions.map((option) => (
+                                    <NestedOption
+                                        key={option.value}
+                                        selectedOptions={selectedOptions}
+                                        option={option}
+                                        parentValueToOptions={parentValueToOptions}
+                                        handleOptionChange={handleOptionChange}
+                                        addOptions={addOptions}
+                                        removeOptions={removeOptions}
+                                        loadData={loadData}
+                                        isMultiSelect={isMultiSelect}
+                                        setSelectedOptions={setSelectedOptions}
+                                        areParentsSelectable={areParentsSelectable}
+                                        isLoadingParentChildList={isLoadingParentChildList}
+                                        hideParentCheckbox={hideParentCheckbox}
+                                    />
+                                ))}
+                            </OptionList>
+                        </DropdownContainer>
+                    );
+                }}
             >
-                <SelectLabelDisplay
-                    selectedOptions={selectedOptions}
-                    placeholder={placeholder || 'Select an option'}
-                    handleOptionChange={handleOptionChange}
-                    showCount={showCount}
-                />
-                <SelectActionButtons
-                    selectedOptions={selectedOptions}
-                    isOpen={isOpen}
-                    isDisabled={!!isDisabled}
-                    isReadOnly={!!isReadOnly}
-                    handleClearSelection={handleClearSelection}
-                    fontSize={size}
-                    showCount={showCount}
-                />
-            </SelectBase>
-            {isOpen && (
-                <DropdownContainer style={{ maxHeight: height, overflow: 'auto' }}>
-                    {showSearch && (
-                        <SearchInputContainer>
-                            <SearchInput
-                                type="text"
-                                placeholder={searchPlaceholder || 'Search...'}
-                                value={searchQuery}
-                                onChange={(e) => handleSearch(e.target.value)}
-                                style={{ fontSize: size || 'md', width: '100%' }}
-                            />
-                            <SearchIcon icon="Search" size={size} color="gray" />
-                        </SearchInputContainer>
-                    )}
-                    <OptionList>
-                        {rootOptions.map((option) => (
-                            <NestedOption
-                                key={option.value}
-                                selectedOptions={selectedOptions}
-                                option={option}
-                                parentValueToOptions={parentValueToOptions}
-                                handleOptionChange={handleOptionChange}
-                                addOptions={addOptions}
-                                removeOptions={removeOptions}
-                                loadData={loadData}
-                                isMultiSelect={isMultiSelect}
-                                setSelectedOptions={setSelectedOptions}
-                                areParentsSelectable={areParentsSelectable}
-                                isLoadingParentChildList={isLoadingParentChildList}
-                                hideParentCheckbox={hideParentCheckbox}
-                            />
-                        ))}
-                    </OptionList>
-                </DropdownContainer>
-            )}
+                <div>
+                    {label && <SelectLabel onClick={handleSelectClick}>{label}</SelectLabel>}
+                    <SelectBase
+                        isDisabled={isDisabled}
+                        isReadOnly={isReadOnly}
+                        isRequired={isRequired}
+                        isOpen={isOpen}
+                        onClick={handleSelectClick}
+                        fontSize={size}
+                        data-testid="nested-options-dropdown-container"
+                        width={props.width}
+                        {...props}
+                    >
+                        <SelectLabelDisplay
+                            selectedOptions={selectedOptions}
+                            placeholder={placeholder || 'Select an option'}
+                            handleOptionChange={handleOptionChange}
+                            showCount={showCount}
+                        />
+                        <SelectActionButtons
+                            selectedOptions={selectedOptions}
+                            isOpen={isOpen}
+                            isDisabled={!!isDisabled}
+                            isReadOnly={!!isReadOnly}
+                            handleClearSelection={handleClearSelection}
+                            fontSize={size}
+                            showCount={showCount}
+                        />
+                    </SelectBase>
+                </div>
+            </Dropdown>
         </Container>
     );
 };

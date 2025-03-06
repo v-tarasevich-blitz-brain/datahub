@@ -13,3 +13,16 @@ export function getFacetFilterInputsFromAppliedFilters(
         .flat()
         .filter((filter) => filter.values?.length);
 }
+/**
+ * Merges two arrays into one, ensuring unique items based on their values or a specific key (using `keyAccessor`).
+ * Items from `arrayB` take precedence over `arrayA` in case of duplicates.
+ */
+export function mergeArraysPreferencingLast<T>(
+    arrayA: Array<T>,
+    arrayB: Array<T>,
+    keyAccessor?: (item: T) => any,
+): Array<T> {
+    const keysOfArrayB = keyAccessor ? arrayB.map(keyAccessor) : arrayB;
+
+    return [...arrayA.filter((item) => keysOfArrayB.includes(keyAccessor ? keyAccessor(item) : item)), ...arrayB];
+}

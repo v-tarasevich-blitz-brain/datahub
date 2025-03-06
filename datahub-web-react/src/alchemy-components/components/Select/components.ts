@@ -91,8 +91,6 @@ export const DropdownContainer = styled.div({
     minWidth: '250px',
 });
 
-
-
 export const SearchInputContainer = styled.div({
     // position: 'sticky',
     // top: 0,

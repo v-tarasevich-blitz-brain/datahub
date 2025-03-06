@@ -1,4 +1,4 @@
-import { AppliedFieldFilterValue, FeildFacetState } from '@src/app/searchV2/filtersPrototype/types';
+import { FeildFacetState } from '@src/app/searchV2/filtersPrototype/types';
 import { Entity, EntityType } from '@src/types.generated';
 import { useMemo } from 'react';
 import { EntitySelectOption } from '../types';
@@ -12,7 +12,7 @@ const mergeEntityArrays = (arrayA: Entity[], arrayB: Entity[]): Entity[] => {
 };
 
 export default function useOptions(
-    appliedFilters: AppliedFieldFilterValue | undefined,
+    appliedEntities: Entity[],
     facetState: FeildFacetState | undefined,
     query: string,
     entityTypes: EntityType[],
@@ -22,7 +22,6 @@ export default function useOptions(
 
     const { data: searchResponse, loading: searchResponseLoading } = useSearch(query, entityTypes);
 
-    const entitiesFromAppliedFilters = useMemo(() => appliedFilters?.entities ?? [], [appliedFilters]);
     const entitiesFromFacetState = useMemo(
         () =>
             (facetState?.facet?.aggregations ?? [])
@@ -38,14 +37,14 @@ export default function useOptions(
     );
 
     const mergedEntities = useMemo(() => {
-        let entities: Entity[] = mergeEntityArrays(entitiesFromAppliedFilters, entitiesFromFacetState);
+        let entities: Entity[] = mergeEntityArrays(appliedEntities, entitiesFromFacetState);
 
         if (query !== '' && !searchResponseLoading) {
             entities = mergeEntityArrays(entities, entitiesFromSearchResponse);
         }
 
         return entities;
-    }, [entitiesFromAppliedFilters, entitiesFromFacetState, entitiesFromSearchResponse, searchResponseLoading, query]);
+    }, [appliedEntities, entitiesFromFacetState, entitiesFromSearchResponse, searchResponseLoading, query]);
 
     const options = useMemo(() => {
         return convertEntiteisToOptions(mergedEntities, entityRender);

@@ -7,6 +7,7 @@ import { useGetAutoCompleteMultipleResultsLazyQuery } from '@src/graphql/search.
 import useConvertEntitiesToOptions from './hooks/useEntitiesToOptions';
 import { EntitySelectOption } from './types';
 import useOptions from './hooks/useOptions';
+import useValues from '../hooks/useValues';
 
 interface GenericEntityFilterProps extends FieldFilterComponentProps {
     filterName: string;
@@ -56,15 +57,10 @@ export default function GenericEntityFilter({
     entityTypes,
 }: GenericEntityFilterProps) {
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const options = useOptions(appliedFilters, facetState, searchQuery, entityTypes, renderEntity);
-    const values: string[] = useMemo(
-        () =>
-            appliedFilters?.filters
-                ?.map((filter) => filter.values)
-                ?.filter((values): values is string[] => values !== undefined && values !== null)
-                ?.flat?.() ?? [],
-        [appliedFilters],
-    );
+    // used to forcibly show entities in options even though these entities are not in facet
+    const [appliedEntities, setAppliedEntities] = useState<Entity[]>([]);
+    const options = useOptions(appliedEntities, facetState, searchQuery, entityTypes, renderEntity);
+    const values = useValues(appliedFilters);
 
     const searchFilter = useCallback((query: string, currentOptions: EntitySelectOption[]) => {
         return currentOptions.filter((option) =>
@@ -85,8 +81,10 @@ export default function GenericEntityFilter({
                         values: values,
                     },
                 ],
-                entities: selectedEntities,
+                // entities: selectedEntities,
             });
+
+            setAppliedEntities(selectedEntities);
         },
         [onUpdate, options],
     );
