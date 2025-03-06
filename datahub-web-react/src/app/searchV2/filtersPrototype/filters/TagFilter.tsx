@@ -1,6 +1,6 @@
 import TagLink from '@src/app/sharedV2/tags/TagLink';
 import { Entity, EntityType, Tag } from '@src/types.generated';
-import { FieldFilterComponentProps } from '../../types';
+import { FieldFilterComponentProps } from '../types';
 import GenericEntityFilter from './entityFilters/GenericEntityFilter';
 import { memo, useCallback } from 'react';
 

@@ -1,5 +1,5 @@
 import { NestedSelect } from '@src/alchemy-components/components/Select/Nested/NestedSelect';
-import { FieldFilterComponentProps } from '../../../types';
+import { FieldFilterComponentProps } from '../../types';
 import useOptions from './hooks/useOptions';
 import { SelectOption } from '@src/alchemy-components/components/Select/Nested/types';
 import useValues from '../hooks/useValues';

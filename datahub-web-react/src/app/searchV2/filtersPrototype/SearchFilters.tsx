@@ -5,7 +5,7 @@ import FiltersRenderingRunner from './FiltersRenderingRunner';
 import { SearchFiltersProvider } from './SearchFiltersContext';
 import { FieldToFacetStateMap, FiltersAppliedHandler } from './types';
 import filterRegistry from './FilterRegistry';
-import PlatformEntityFilter from './defaults/filters/PlatformFilter';
+import PlatformEntityFilter from './filters/PlatformFilter';
 import {
     DOMAINS_FILTER_NAME,
     ENTITY_SUB_TYPE_FILTER_NAME,
@@ -14,11 +14,11 @@ import {
     PLATFORM_FILTER_NAME,
     TAGS_FILTER_NAME,
 } from '../utils/constants';
-import OwnerFilter from './defaults/filters/OwnerFilter';
-import TagFilter from './defaults/filters/TagFilter';
+import OwnerFilter from './filters/OwnerFilter';
+import TagFilter from './filters/TagFilter';
 // import DomainFilter from './defaults/filters/DomainFilter';
-import EntityTypeFilter from './defaults/filters/EntityTypeFilter/EntityTypeFilter';
-import DomainFilter from './defaults/filters/DomainFilter/DomainFilter';
+import EntityTypeFilter from './filters/EntityTypeFilter/EntityTypeFilter';
+import DomainFilter from './filters/DomainFilter/DomainFilter';
 
 const Container = styled.div`
     display: flex;

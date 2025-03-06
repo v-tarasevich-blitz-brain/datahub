@@ -1,5 +1,5 @@
 import { AggregationMetadata, Entity, EntityType } from '@src/types.generated';
-import { FieldFilterComponentProps } from '../../types';
+import { FieldFilterComponentProps } from '../types';
 import GenericEntityFilter from './entityFilters/GenericEntityFilter';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';

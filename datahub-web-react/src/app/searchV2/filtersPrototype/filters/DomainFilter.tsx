@@ -3,7 +3,7 @@ import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoComp
 import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
 import { Entity, EntityType } from '@src/types.generated';
 import styled from 'styled-components';
-import { FieldFilterComponentProps } from '../../types';
+import { FieldFilterComponentProps } from '../types';
 import GenericEntityFilter from './entityFilters/GenericEntityFilter';
 import { useCallback } from 'react';
 
