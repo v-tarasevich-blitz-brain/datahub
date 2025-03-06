@@ -13,7 +13,6 @@ export interface SelectOption {
 export type SelectLabelVariants = 'default' | 'labeled';
 
 export interface SelectProps<Option extends SelectOption = SelectOption> {
-    searchFilter?: (query: string, options: Option[]) => Option[];
     options: Option[];
     label?: string;
     values?: string[];
@@ -23,6 +22,8 @@ export interface SelectProps<Option extends SelectOption = SelectOption> {
     size?: SelectSizeOptions;
     icon?: IconNames;
     showSearch?: boolean;
+    searchFilter?: (query: string, options: Option[]) => Option[];
+    onSearchQueryChanged?: (query: string) => void;
     isDisabled?: boolean;
     isReadOnly?: boolean;
     isRequired?: boolean;

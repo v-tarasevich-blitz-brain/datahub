@@ -73,6 +73,7 @@ export default memo(function DynamicFacetsUpdater({
         <>
             {fieldNames.map((fieldName) => (
                 <FieldFacetUpdater
+                    key={fieldName}
                     fieldName={fieldName}
                     query={query}
                     onFieldFacetUpdated={onFieldFacetUpdated}
@@ -80,4 +81,4 @@ export default memo(function DynamicFacetsUpdater({
             ))}
         </>
     );
-})
+});

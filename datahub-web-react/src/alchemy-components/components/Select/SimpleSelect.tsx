@@ -323,7 +323,6 @@ export const SimpleSelect = <OptionType extends SelectOption>({
                     </SelectBase>
                 </Dropdown>
             </Container>
-            
         </>
     );
 };

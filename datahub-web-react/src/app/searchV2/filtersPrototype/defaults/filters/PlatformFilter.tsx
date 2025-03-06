@@ -1,7 +1,7 @@
 import { Text } from '@src/alchemy-components';
 import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';
 import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
-import { Entity } from '@src/types.generated';
+import { Entity, EntityType } from '@src/types.generated';
 import styled from 'styled-components';
 import { FieldFilterComponentProps } from '../../types';
 import GenericEntityFilter from './entityFilters/GenericEntityFilter';
@@ -60,5 +60,12 @@ function PlatformLabel({ entity }: PlatformLabelProps) {
 export default function PlatformEntityFilter(props: FieldFilterComponentProps) {
     const renderEntity = useCallback((entity: Entity) => <PlatformLabel entity={entity} />, []);
 
-    return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
-};
+    return (
+        <GenericEntityFilter
+            {...props}
+            renderEntity={renderEntity}
+            entityTypes={[EntityType.DataPlatform]}
+            filterName="Platforms"
+        />
+    );
+}

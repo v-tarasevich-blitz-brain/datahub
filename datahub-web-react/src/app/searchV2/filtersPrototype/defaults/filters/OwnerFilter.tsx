@@ -81,6 +81,7 @@ export default function OwnerFilter(props: FieldFilterComponentProps) {
             {...props}
             renderEntity={renderEntity}
             entityTypes={[EntityType.CorpUser, EntityType.CorpGroup]}
+            filterName="Owner"
         />
     );
 }

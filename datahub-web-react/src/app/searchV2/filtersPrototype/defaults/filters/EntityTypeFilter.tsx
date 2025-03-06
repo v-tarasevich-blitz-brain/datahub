@@ -46,6 +46,11 @@ export default function EntityTypeFilter(props: FieldFilterComponentProps) {
     const aggregationMetadataToLabel = useCallback((entity: Entity) => <EntityTypeLabel entity={entity} />, []);
 
     return (
-        <GenericEntityFilter {...props} renderEntity={aggregationMetadataToLabel} entityTypes={[EntityType.Dataset]} />
+        <GenericEntityFilter
+            {...props}
+            renderEntity={aggregationMetadataToLabel}
+            entityTypes={[EntityType.Dataset]}
+            filterName="Types"
+        />
     );
 }

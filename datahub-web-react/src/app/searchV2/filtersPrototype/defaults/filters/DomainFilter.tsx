@@ -60,5 +60,12 @@ function DomainLabel({ entity }: PlatformLabelProps) {
 export default function DomainFilter(props: FieldFilterComponentProps) {
     const renderEntity = useCallback((entity: Entity) => <DomainLabel entity={entity} />, []);
 
-    return <GenericEntityFilter {...props} renderEntity={renderEntity} entityTypes={[EntityType.Domain]} />;
+    return (
+        <GenericEntityFilter
+            {...props}
+            renderEntity={renderEntity}
+            entityTypes={[EntityType.Domain]}
+            filterName="Domains"
+        />
+    );
 }

@@ -68,6 +68,7 @@ export const BasicSelect = <OptionType extends SelectOption>({
     showDescriptions = basicSelectDefaults.showDescriptions,
     icon,
     searchFilter,
+    onSearchQueryChanged,
     selectLabelProps,
     className,
     ...props
@@ -100,6 +101,8 @@ export const BasicSelect = <OptionType extends SelectOption>({
             return true;
         });
     }, [options, searchQuery, searchFilter]);
+
+    useEffect(() => onSearchQueryChanged?.(searchQuery), [searchQuery, onSearchQueryChanged]);
 
     const handleDocumentClick = useCallback((e: MouseEvent) => {
         if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
