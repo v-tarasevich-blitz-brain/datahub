@@ -8,17 +8,13 @@ const Container = styled.div`
     gap: 8px;
 `;
 
-export default function DefaultFiltersRenderer({ filters }: FiltersRendererProps) {
-    // console.log('>>> filters', filters)
-
-    console.log('>>> RENDER DefaultFiltersRenderer');
-
+export default memo(function DefaultFiltersRenderer({ filters }: FiltersRendererProps) {
     return (
         <Container>
             {filters.map((filter) => {
                 const FilterComponent = filter.component;
-                return <FilterComponent {...filter.props} />;
+                return <FilterComponent {...filter.props} key={filter.fieldName} />;
             })}
         </Container>
     );
-}
+});

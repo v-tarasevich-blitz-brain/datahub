@@ -76,5 +76,11 @@ function OwnerLabel({ entity }: PlatformLabelProps) {
 export default function OwnerFilter(props: FieldFilterComponentProps) {
     const renderEntity = useCallback((entity: Entity) => <OwnerLabel entity={entity} />, []);
 
-    return <GenericEntityFilter {...props} renderEntity={renderEntity} />;
-};
+    return (
+        <GenericEntityFilter
+            {...props}
+            renderEntity={renderEntity}
+            entityTypes={[EntityType.CorpUser, EntityType.CorpGroup]}
+        />
+    );
+}

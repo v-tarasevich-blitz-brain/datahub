@@ -7,9 +7,17 @@ import { FieldToFacetStateMap, FiltersAppliedHandler } from './types';
 import filterRegistry from './FilterRegistry';
 import PlatformEntityFilter from './defaults/filters/PlatformFilter';
 import EntityTypeFilter from './defaults/filters/EntityTypeFilter';
-import { DOMAINS_FILTER_NAME, ENTITY_SUB_TYPE_FILTER_NAME, FIELD_TAGS_FILTER_NAME, OWNERS_FILTER_NAME, PLATFORM_FILTER_NAME, TAGS_FILTER_NAME } from '../utils/constants';
+import {
+    DOMAINS_FILTER_NAME,
+    ENTITY_SUB_TYPE_FILTER_NAME,
+    FIELD_TAGS_FILTER_NAME,
+    OWNERS_FILTER_NAME,
+    PLATFORM_FILTER_NAME,
+    TAGS_FILTER_NAME,
+} from '../utils/constants';
 import OwnerFilter from './defaults/filters/OwnerFilter';
 import TagFilter from './defaults/filters/TagFilter';
+import DomainFilter from './defaults/filters/DomainFilter';
 
 const Container = styled.div`
     display: flex;
@@ -27,11 +35,20 @@ filterRegistry.registerRenderer(PLATFORM_FILTER_NAME, PlatformEntityFilter);
 filterRegistry.registerRenderer(ENTITY_SUB_TYPE_FILTER_NAME, EntityTypeFilter);
 filterRegistry.registerRenderer(OWNERS_FILTER_NAME, OwnerFilter);
 filterRegistry.registerRenderer(TAGS_FILTER_NAME, TagFilter);
-filterRegistry.registerRenderer(DOMAINS_FILTER_NAME, PlatformEntityFilter);
+filterRegistry.registerRenderer(DOMAINS_FILTER_NAME, DomainFilter);
 
 export default function SearchFilters({ query, onFiltersApplied }: SearchFiltersProps) {
     // TODO:: pass field through props
-    const fields = useMemo(() => [PLATFORM_FILTER_NAME, ENTITY_SUB_TYPE_FILTER_NAME, OWNERS_FILTER_NAME, TAGS_FILTER_NAME, DOMAINS_FILTER_NAME], []);
+    const fields = useMemo(
+        () => [
+            PLATFORM_FILTER_NAME,
+            ENTITY_SUB_TYPE_FILTER_NAME,
+            OWNERS_FILTER_NAME,
+            TAGS_FILTER_NAME,
+            DOMAINS_FILTER_NAME,
+        ],
+        [],
+    );
     const [fieldToFacetStateMap, setFieldToFacetStateMap] = useState<FieldToFacetStateMap>(new Map());
 
     const wrappedQuery = useMemo(() => {

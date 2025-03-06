@@ -6,9 +6,11 @@ import { FIELD_TO_FILTER_NAME_MAP } from '../constants';
 import { useGetAutoCompleteMultipleResultsLazyQuery } from '@src/graphql/search.generated';
 import useConvertEntitiesToOptions from './hooks/useEntitiesToOptions';
 import { EntitySelectOption } from './types';
+import useOptions from './hooks/useOptions';
 
 interface GenericEntityFilterProps extends FieldFilterComponentProps {
     renderEntity: (entity: Entity) => React.ReactNode;
+    entityTypes: EntityType[];
 }
 
 const mergeOptions = (optionsA: SelectOption[], optionsB: SelectOption[]): SelectOption[] => {
@@ -49,75 +51,86 @@ export default function GenericEntityFilter({
     onUpdate,
     facetState,
     renderEntity,
+    entityTypes,
 }: GenericEntityFilterProps) {
-
     console.log('>>> RENDER GenericEntityFilter', fieldName);
 
     const [searchQuery, setSearchQuery] = useState<string>('');
 
-    const [options, setOptions] = useState<EntitySelectOption[]>([]);
+    // const [options, setOptions] = useState<EntitySelectOption[]>([]);
     const [label, setLabel] = useState<string>('Unknown');
 
+    const options = useOptions(appliedFilters, facetState, searchQuery, entityTypes, renderEntity);
+
     // Selects should have only one applied filter
+    // TODO:: use map.flat instead [0]
     const values = useMemo(() => appliedFilters?.[0]?.values ?? [], [appliedFilters]);
 
-    const isFacetStateLoading = facetState?.loading;
+    // const isFacetStateLoading = facetState?.loading;
 
-    const aggregations1 = useMemo(() => facetState?.facet?.aggregations || [], [facetState]);
+    // const aggregations1 = useMemo(() => facetState?.facet?.aggregations || [], [facetState]);
 
-    const [getSearchResults, { data, loading: searchLoading }] = useGetAutoCompleteMultipleResultsLazyQuery();
+    // const [getSearchResults, { data, loading: searchLoading }] = useGetAutoCompleteMultipleResultsLazyQuery();
 
-    const convertEntiteisToOptions = useConvertEntitiesToOptions();
+    // const convertEntiteisToOptions = useConvertEntitiesToOptions();
 
     // const updateSearchResults = ()
 
-    const onSearch = useCallback(
-        (query: string, currentOptions: EntitySelectOption[]) => {
-            console.log('>>> onSearch CALL', currentOptions)
-            setSearchQuery(query);
-            return currentOptions.filter((option) => option.displayName.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
-        },
-        [],
-    );
+    const onSearch = useCallback((query: string, currentOptions: EntitySelectOption[]) => {
+        console.log('>>> onSearch CALL', currentOptions);
+        setSearchQuery(query);
+        return currentOptions.filter((option) =>
+            option.displayName.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
+        );
+    }, []);
 
-    // TODO:: add debounce
-    useEffect(() => {
-        getSearchResults({
-            variables: {
-                input: {
-                    query: searchQuery,
-                    // TODO:: replace with real entity type
-                    types: [EntityType.Tag],
-                    // TODO:: use constant!
-                    limit: 20,
-                },
-            },
-        });
-    }, [searchQuery]);
+    // // TODO:: add debounce
+    // useEffect(() => {
+    //     getSearchResults({
+    //         variables: {
+    //             input: {
+    //                 query: searchQuery,
+    //                 types: entityTypes,
+    //                 // TODO:: use constant!
+    //                 limit: 20,
+    //             },
+    //         },
+    //     });
+    // }, [searchQuery, entityTypes]);
 
-    useEffect(() => {
-        const entitiesFromAppliedFilters = appliedFilters?.entities || [];
+    // const searchedEntities = useMemo(() => {
+    //     return data?.autoCompleteForMultiple?.suggestions.map((suggestion) => suggestion.entities).flat() ?? [];
+    // }, [data, entityTypes]);
 
-        const entitiesFromAggregations = (facetState?.facet?.aggregations || [])
-            .filter((aggregation) => aggregation.count > 0)
-            .filter((aggregation) => !!aggregation.entity)
-            .map((aggregation) => aggregation.entity);
+    // useEffect(() => {
+    //     const entitiesFromAppliedFilters = appliedFilters?.entities || [];
 
-        const urnsOfEntitiesFromAggregations = entitiesFromAggregations.map((entity) => entity?.urn);
+    //     const entitiesFromAggregations = (facetState?.facet?.aggregations || [])
+    //         .filter((aggregation) => aggregation.count > 0)
+    //         .filter((aggregation) => !!aggregation.entity)
+    //         .map((aggregation) => aggregation.entity);
 
-        const entities = [
-            ...entitiesFromAppliedFilters.filter((entity) => !urnsOfEntitiesFromAggregations.includes(entity.urn)),
-            ...entitiesFromAggregations,
-        ];
+    //     const urnsOfEntitiesFromAggregations = entitiesFromAggregations.map((entity) => entity?.urn);
 
-        // const optionsToShow: SelectOption[] = entities.map((entity) => entityToOption(entity as Entity, renderEntity));
-        const optionsToShow = convertEntiteisToOptions(entities as Entity[], renderEntity);
-        setOptions(optionsToShow);
-    }, [facetState, renderEntity, isFacetStateLoading, convertEntiteisToOptions]);
+    //     const entities = [
+    //         ...entitiesFromAppliedFilters.filter((entity) => !urnsOfEntitiesFromAggregations.includes(entity.urn)),
+    //         ...entitiesFromAggregations,
+    //         // TODO:: add uniqueness
+    //         ...(searchQuery !== '' && !searchLoading ? searchedEntities : []),
+    //     ];
 
-    const searchedOptions = useMemo(() => {
-        data?.autoCompleteForMultiple?.suggestions;
-    }, [data]);
+    //     const optionsToShow = convertEntiteisToOptions(entities as Entity[], renderEntity);
+    //     // setOptions(optionsToShow);
+    // }, [
+    //     facetState,
+    //     renderEntity,
+    //     isFacetStateLoading,
+    //     convertEntiteisToOptions,
+    //     appliedFilters,
+    //     searchedEntities,
+    //     searchQuery,
+    //     searchLoading,
+    // ]);
 
     useEffect(() => {
         const filterName = FIELD_TO_FILTER_NAME_MAP.get(fieldName) ?? facetState?.facet?.displayName;
@@ -126,8 +139,6 @@ export default function GenericEntityFilter({
 
     const onSelectUpdate = useCallback(
         (values: string[]) => {
-            // const selectedAggregations = aggregations1?.filter((aggregation) => values.includes(aggregation.value));
-
             const selectedOptions = options.filter((option) => values.includes(option.value));
             const selectedEntities = selectedOptions.map((option) => option.entity);
 
@@ -142,12 +153,11 @@ export default function GenericEntityFilter({
                 entities: selectedEntities,
             });
         },
-        [onUpdate, aggregations1],
+        [onUpdate, options],
     );
 
     return (
         <Select<EntitySelectOption>
-            // TODO:: implement filter
             searchFilter={onSearch}
             values={values}
             onUpdate={onSelectUpdate}

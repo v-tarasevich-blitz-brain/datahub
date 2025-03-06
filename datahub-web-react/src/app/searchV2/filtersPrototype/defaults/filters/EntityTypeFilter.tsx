@@ -1,4 +1,4 @@
-import { AggregationMetadata, Entity } from '@src/types.generated';
+import { AggregationMetadata, Entity, EntityType } from '@src/types.generated';
 import { FieldFilterComponentProps } from '../../types';
 import GenericEntityFilter from './entityFilters/GenericEntityFilter';
 import React, { memo, useCallback } from 'react';
@@ -45,5 +45,7 @@ function EntityTypeLabel({ entity }: PlatformLabelProps) {
 export default function EntityTypeFilter(props: FieldFilterComponentProps) {
     const aggregationMetadataToLabel = useCallback((entity: Entity) => <EntityTypeLabel entity={entity} />, []);
 
-    return <GenericEntityFilter {...props} renderEntity={aggregationMetadataToLabel} />;
-};
+    return (
+        <GenericEntityFilter {...props} renderEntity={aggregationMetadataToLabel} entityTypes={[EntityType.Dataset]} />
+    );
+}

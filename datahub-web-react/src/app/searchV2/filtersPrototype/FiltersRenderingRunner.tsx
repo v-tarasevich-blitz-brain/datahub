@@ -7,6 +7,8 @@ export default memo(function FiltersRenderingRunner({ fields }: InternalRenderer
     const { filtersRenderer, fieldToFacetStateMap, updateFieldAppliedFilters, fieldToAppliedFiltersMap } =
         useSearchFiltersContext();
 
+    const Renderer = useMemo(() => filtersRenderer, [filtersRenderer]);
+
     const filters: Filter[] = useMemo(
         () =>
             fields.map((field) => ({
@@ -22,5 +24,5 @@ export default memo(function FiltersRenderingRunner({ fields }: InternalRenderer
         [fields, fieldToFacetStateMap, updateFieldAppliedFilters, fieldToAppliedFiltersMap],
     );
 
-    return <>{filtersRenderer({ filters })}</>;
+    return <Renderer filters={filters} />;
 });
