@@ -1,10 +1,9 @@
 import { AppliedFieldFilterValue, FeildFacetState } from '@src/app/searchV2/filtersPrototype/types';
-import { EntitySelectOption } from '../types';
-import { useMemo } from 'react';
-import useSearch from './useSearch';
 import { Entity, EntityType } from '@src/types.generated';
-import { SuggestionContainer } from '@src/app/search/autoComplete/AutoCompleteItem';
+import { useMemo } from 'react';
+import { EntitySelectOption } from '../types';
 import useConvertEntitiesToOptions from './useEntitiesToOptions';
+import useSearch from './useSearch';
 
 const mergeEntityArrays = (arrayA: Entity[], arrayB: Entity[]): Entity[] => {
     const urnsFromArrayB = arrayB.map((entity) => entity.urn);
