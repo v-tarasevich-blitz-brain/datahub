@@ -28,6 +28,7 @@ import { basicSelectDefaults, selectDefaults } from './defaults';
 import Dropdown from '../Dropdown/Dropdown';
 import DropdownSearchBar from './private/dropdown/DropdownSearchBar';
 import DropdownFooter from './private/dropdown/DropdownFooter';
+import DropdownSelectAllOption from './private/dropdown/DropdownSelectAllOption';
 
 const SelectActionButtons = ({
     selectedValues,
@@ -206,21 +207,30 @@ export const BasicSelect = <OptionType extends SelectOption>({
                                 )}
                                 <OptionList>
                                     {showSelectAll && isMultiSelect && (
-                                        <SelectAllOption
-                                            isSelected={areAllSelected}
+                                        <DropdownSelectAllOption
+                                            label={selectAllLabel}
+                                            selected={areAllSelected}
                                             onClick={() =>
                                                 !(disabledValues.length === options.length) && handleSelectAll()
                                             }
-                                            isDisabled={disabledValues.length === options.length}
-                                        >
-                                            <LabelContainer>
-                                                <span>{selectAllLabel}</span>
-                                                <StyledCheckbox
-                                                    checked={areAllSelected}
-                                                    disabled={disabledValues.length === options.length}
-                                                />
-                                            </LabelContainer>
-                                        </SelectAllOption>
+                                            disabled={disabledValues.length === options.length}
+                                        />
+
+                                        // <SelectAllOption
+                                        //     isSelected={areAllSelected}
+                                        //     onClick={() =>
+                                        //         !(disabledValues.length === options.length) && handleSelectAll()
+                                        //     }
+                                        //     isDisabled={disabledValues.length === options.length}
+                                        // >
+                                        //     <LabelContainer>
+                                        //         <span>{selectAllLabel}</span>
+                                        //         <StyledCheckbox
+                                        //             checked={areAllSelected}
+                                        //             disabled={disabledValues.length === options.length}
+                                        //         />
+                                        //     </LabelContainer>
+                                        // </SelectAllOption>
                                     )}
                                     {filteredOptions.map((option) => (
                                         <OptionLabel

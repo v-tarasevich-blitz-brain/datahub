@@ -1,76 +1,46 @@
 import React, { useEffect, useRef } from 'react';
 
-interface OutsideAlerterType {
-    children: React.ReactNode;
+interface ClickOutsideProps {
     onClickOutside: () => void;
-    overlayClassName?: string;
-    wrapperClassName?: string;
-    excludeClassName?: string;
-
-    outsideSelector?: string;
-    ignoreSelector?: string;
+    outsideSelector?: string; // Selector for elements that should trigger `onClickOutside`
+    ignoreSelector?: string; // Selector for elements that should be ignored
+    ignoreWrapper?: boolean; // Enable to ignore click outside the wrapper
 }
 
-export default function ClickOutside({ children, onClickOutside, overlayClassName, wrapperClassName, ignoreSelector, outsideSelector }: OutsideAlerterType) {
+export default function ClickOutside({
+    children,
+    onClickOutside,
+    outsideSelector,
+    ignoreSelector,
+    ignoreWrapper,
+}: React.PropsWithChildren<ClickOutsideProps>) {
     const wrapperRef = useRef<HTMLDivElement>(null);
 
-    function handleClickOutside(event: MouseEvent) {
-        const isElement = event.target instanceof Element;
-        if (!isElement) return null;
+    /**
+     * Handles click events outside the wrapper or based on selectors.
+     */
+    const handleClickOutside = (event: MouseEvent): void => {
+        const target = event.target as HTMLElement;
 
+        // Ignore clicks on elements matching `ignoreSelector`
+        if (ignoreSelector && target.closest(ignoreSelector)) return;
 
-        // console.log('>>> handleClickOutside', {event, ignoreSelector, outsideSelector});
-
-
-        if (ignoreSelector) {
-            // debugger;
-            if (!!event.target.closest(ignoreSelector)) {
-                // console.log('>>> handleClickOutside ignored');
-                return null
-            };
+        // Trigger `onClickOutside` if the click is on an element matching `outsideSelector`
+        if (outsideSelector && target.closest(outsideSelector)) {
+            onClickOutside();
+            return;
         }
 
-        // console.log('>>> handleClickOutside not ignored');
-
-
-        if (outsideSelector) {
-            if (!!event.target.closest(outsideSelector)) {
-                // console.log('>>> handleClickOutside 1')
-                onClickOutside();
-
-            };
-        } 
-        
-        if (!(wrapperRef.current as HTMLDivElement).contains((event.target as Node) || null)) {
-            // console.log('>>> handleClickOutside 2')
+        // Trigger `onClickOutside` if the click is outside the wrapper
+        if (!ignoreWrapper && wrapperRef.current && !wrapperRef.current.contains(target)) {
             onClickOutside();
         }
-
-
-
-
-        // if (overlayClassName) {
-        //     if (event.target.classList.contains(overlayClassName)) {
-        //         onClickOutside();
-        //     }
-        // }else if (wrapperClassName) {
-        //     console.log('>>> click internal', {closest: event.target?.closest?.(`.${wrapperClassName}`), fn: event.target?.closest})
-        //     if (!event.target.closest?.(`.${wrapperClassName}`)) {
-        //         onClickOutside();
-        //     }
-        // } else if (!(wrapperRef.current as HTMLDivElement).contains((event.target as Node) || null)) {
-        //     onClickOutside();
-        // }
-    }
+    };
 
     useEffect(() => {
-        if (wrapperRef && wrapperRef.current) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    });
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [onClickOutside]);
 
     return <div ref={wrapperRef}>{children}</div>;
 }

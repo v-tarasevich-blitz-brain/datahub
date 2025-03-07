@@ -11,6 +11,10 @@ export interface SelectOption {
 }
 
 export type SelectLabelVariants = 'default' | 'labeled';
+export interface SelectLabelProps {
+    variant: SelectLabelVariants;
+    label: string;
+}
 
 export interface SelectProps<Option extends SelectOption = SelectOption> {
     options: Option[];
@@ -37,10 +41,7 @@ export interface SelectProps<Option extends SelectOption = SelectOption> {
     showDescriptions?: boolean;
     optionListTestId?: string;
     optionSwitchable?: boolean;
-    selectLabelProps?: {
-        variant: SelectLabelVariants;
-        label: string;
-    };
+    selectLabelProps?: SelectLabelProps;
     className?: string;
 }
 

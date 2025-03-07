@@ -56,7 +56,7 @@ export default function EntityTypeFilter({
             width="fit-content"
             showSearch
             showCount
-            showButtons
+            shouldManuallyUpdate
         />
     );
 }

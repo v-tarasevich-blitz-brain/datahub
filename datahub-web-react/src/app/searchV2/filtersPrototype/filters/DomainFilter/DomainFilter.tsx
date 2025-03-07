@@ -47,6 +47,8 @@ export default function DomainFilter({ fieldName, facetState, appliedFilters, on
             width="fit-content"
             showSearch
             showCount
+            shouldManuallyUpdate
+            selectLabelProps={{ variant: 'labeled', label: 'Domains' }}
         />
     );
 }

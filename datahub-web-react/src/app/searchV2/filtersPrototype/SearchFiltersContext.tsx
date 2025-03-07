@@ -1,10 +1,8 @@
-import { FacetFilterInput, FilterOperator } from '@src/types.generated';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import DefaultFiltersRenderer from './defaults/DefaultFiltersRenderer';
 import {
-    FieldToAppliedFieldFiltersMap,
     AppliedFieldFilterUpdater,
-    FieldName,
+    FieldToAppliedFieldFiltersMap,
     SearchFiltersContextType,
     SearchFiltersProviderProps,
 } from './types';

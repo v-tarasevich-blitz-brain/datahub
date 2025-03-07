@@ -17,11 +17,13 @@ import {
     StyledClearButton,
 } from '../components';
 
-import { SelectSizeOptions } from '../types';
+import { SelectLabelProps, SelectLabelVariants, SelectSizeOptions } from '../types';
 import { NestedOption } from './NestedOption';
 import { SelectOption } from './types';
 import Dropdown from '../../Dropdown/Dropdown';
 import DropdownFooter from '../private/dropdown/DropdownFooter';
+import SelectLabelRenderer from '../private/SelectLabelRenderer/SelectLabelRenderer';
+import DropdownSearchBar from '../private/dropdown/DropdownSearchBar';
 
 const NO_PARENT_VALUE = 'no_parent_value';
 
@@ -120,7 +122,7 @@ export interface SelectProps {
     initialValues?: SelectOption[];
     onCancel?: () => void;
     onUpdate?: (selectedValues: SelectOption[]) => void;
-    showButtons?: boolean;
+    shouldManuallyUpdate?: boolean;
     size?: SelectSizeOptions;
     showSearch?: boolean;
     isDisabled?: boolean;
@@ -138,6 +140,7 @@ export interface SelectProps {
     showCount?: boolean;
     shouldAlwaysSyncParentValues?: boolean;
     hideParentCheckbox?: boolean;
+    selectLabelProps?: SelectLabelProps;
 }
 
 export const selectDefaults: SelectProps = {
@@ -174,14 +177,14 @@ export const NestedSelect = ({
     showCount = false,
     shouldAlwaysSyncParentValues = false,
     hideParentCheckbox = false,
-    showButtons,
+    shouldManuallyUpdate = false,
+    selectLabelProps,
     ...props
 }: SelectProps) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<SelectOption[]>(initialValues);
     const [stagedOptions, setStagedOptions] = useState<SelectOption[]>(initialValues);
-    const selectRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (initialValues && shouldAlwaysSyncParentValues) {
@@ -196,25 +199,6 @@ export const NestedSelect = ({
     }, [initialValues]);
 
     // TODO: handle searching inside of a nested component on the FE only
-
-    // const handleDocumentClick = useCallback((e: MouseEvent) => {
-    //     if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
-    //         setIsOpen(false);
-    //     }
-    // }, []);
-
-    // useEffect(() => {
-    //     document.addEventListener('click', handleDocumentClick);
-    //     return () => {
-    //         document.removeEventListener('click', handleDocumentClick);
-    //     };
-    // }, [handleDocumentClick]);
-
-    const handleSelectClick = useCallback(() => {
-        // if (!isDisabled && !isReadOnly) {
-        //     setIsOpen((prev) => !prev);
-        // }
-    }, [isDisabled, isReadOnly]);
 
     const handleSearch = useCallback(
         (query: string) => {
@@ -231,16 +215,18 @@ export const NestedSelect = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedOptions]);
 
+    // Sync staged and selected options automaticly when shouldManuallyUpdate disabled
     useEffect(() => {
-        if (!showButtons) setSelectedOptions(stagedOptions);
-    }, [showButtons, stagedOptions]);
+        if (!shouldManuallyUpdate) setSelectedOptions(stagedOptions);
+    }, [shouldManuallyUpdate, stagedOptions]);
 
     const onClickUpdateButton = useCallback(() => {
-        setSelectedOptions(stagedOptions);
+        setSelectedOptions(stagedOptions); // update selected options
         setIsOpen(false);
     }, [stagedOptions]);
+
     const onClickCancelButton = useCallback(() => {
-        setStagedOptions(selectedOptions);
+        setStagedOptions(selectedOptions); // reset staged options
         setIsOpen(false);
     }, [selectedOptions]);
 
@@ -272,14 +258,15 @@ export const NestedSelect = ({
         [stagedOptions],
     );
 
-    const removeOptions = useCallback(
-        (optionsToRemove: SelectOption[]) => {
+    const removeStagedOptions = useCallback(
+        (optionsToRemove: SelectOption[], syncWithSelectedOptions?: boolean) => {
             const newValues = stagedOptions.filter(
                 (selectedOption) => !optionsToRemove.find((o) => o.value === selectedOption.value),
             );
             setStagedOptions(newValues);
+            if (!shouldManuallyUpdate || syncWithSelectedOptions) setSelectedOptions(newValues);
         },
-        [stagedOptions],
+        [stagedOptions, shouldManuallyUpdate],
     );
 
     const handleClearSelection = useCallback(() => {
@@ -303,28 +290,21 @@ export const NestedSelect = ({
     const rootOptions = parentValueToOptions[NO_PARENT_VALUE] || [];
 
     return (
-        <Container ref={selectRef} size={size || 'md'} width={props.width || 255}>
+        <Container size={size || 'md'} width={props.width || 255}>
             <Dropdown
                 open={isOpen}
                 overlayClassName="autocomplete-click-outside-ignore"
-                onOpenChange={(open) => {
-                    setIsOpen(open);
-                    // console.log('>>> onOpenChange', open);
-                }}
+                onOpenChange={(open) => setIsOpen(open)}
                 dropdownRender={() => {
                     return (
                         <DropdownContainer style={{ maxHeight: height, overflow: 'auto' }}>
                             {showSearch && (
-                                <SearchInputContainer>
-                                    <SearchInput
-                                        type="text"
-                                        placeholder={searchPlaceholder || 'Search...'}
-                                        value={searchQuery}
-                                        onChange={(e) => handleSearch(e.target.value)}
-                                        style={{ fontSize: size || 'md', width: '100%' }}
-                                    />
-                                    <SearchIcon icon="Search" size={size} color="gray" />
-                                </SearchInputContainer>
+                                <DropdownSearchBar
+                                    placeholder={searchPlaceholder}
+                                    value={searchQuery}
+                                    onChange={handleSearch}
+                                    size={size}
+                                />
                             )}
                             <OptionList>
                                 {rootOptions.map((option) => (
@@ -335,7 +315,7 @@ export const NestedSelect = ({
                                         parentValueToOptions={parentValueToOptions}
                                         handleOptionChange={handleOptionChange}
                                         addOptions={addOptions}
-                                        removeOptions={removeOptions}
+                                        removeOptions={removeStagedOptions}
                                         loadData={loadData}
                                         isMultiSelect={isMultiSelect}
                                         setSelectedOptions={setStagedOptions}
@@ -345,7 +325,7 @@ export const NestedSelect = ({
                                     />
                                 ))}
                             </OptionList>
-                            {showButtons && (
+                            {shouldManuallyUpdate && (
                                 <DropdownFooter onUpdate={onClickUpdateButton} onCancel={onClickCancelButton} />
                             )}
                         </DropdownContainer>
@@ -353,23 +333,24 @@ export const NestedSelect = ({
                 }}
             >
                 <div>
-                    {label && <SelectLabel onClick={handleSelectClick}>{label}</SelectLabel>}
+                    {label && <SelectLabel>{label}</SelectLabel>}
                     <SelectBase
                         isDisabled={isDisabled}
                         isReadOnly={isReadOnly}
                         isRequired={isRequired}
                         isOpen={isOpen}
-                        onClick={handleSelectClick}
                         fontSize={size}
                         data-testid="nested-options-dropdown-container"
                         width={props.width}
                         {...props}
                     >
-                        <SelectLabelDisplay
-                            selectedOptions={selectedOptions}
+                        <SelectLabelRenderer
+                            selectedValues={selectedOptions.map((o) => o.value)}
+                            options={options}
                             placeholder={placeholder || 'Select an option'}
-                            handleOptionChange={handleOptionChange}
-                            showCount={showCount}
+                            isMultiSelect={isMultiSelect}
+                            removeOption={(option) => removeStagedOptions([option], true)}
+                            {...(selectLabelProps || {})}
                         />
                         <SelectActionButtons
                             selectedOptions={selectedOptions}
