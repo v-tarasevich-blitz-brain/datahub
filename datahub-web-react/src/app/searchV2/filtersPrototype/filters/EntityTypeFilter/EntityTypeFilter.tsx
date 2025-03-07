@@ -57,6 +57,7 @@ export default function EntityTypeFilter({
             showSearch
             showCount
             shouldManuallyUpdate
+            selectLabelProps={{ variant: 'labeled', label: 'Types' }}
         />
     );
 }
