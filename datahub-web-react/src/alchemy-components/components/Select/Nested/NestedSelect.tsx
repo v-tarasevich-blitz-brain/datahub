@@ -21,6 +21,7 @@ import { SelectSizeOptions } from '../types';
 import { NestedOption } from './NestedOption';
 import { SelectOption } from './types';
 import Dropdown from '../../Dropdown/Dropdown';
+import DropdownFooter from '../private/dropdown/DropdownFooter';
 
 const NO_PARENT_VALUE = 'no_parent_value';
 
@@ -119,6 +120,7 @@ export interface SelectProps {
     initialValues?: SelectOption[];
     onCancel?: () => void;
     onUpdate?: (selectedValues: SelectOption[]) => void;
+    showButtons?: boolean;
     size?: SelectSizeOptions;
     showSearch?: boolean;
     isDisabled?: boolean;
@@ -172,20 +174,22 @@ export const NestedSelect = ({
     showCount = false,
     shouldAlwaysSyncParentValues = false,
     hideParentCheckbox = false,
+    showButtons,
     ...props
 }: SelectProps) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<SelectOption[]>(initialValues);
+    const [stagedOptions, setStagedOptions] = useState<SelectOption[]>(initialValues);
     const selectRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (initialValues && shouldAlwaysSyncParentValues) {
-            const filteredOptions = selectedOptions.filter((option) =>
+            const filteredOptions = stagedOptions.filter((option) =>
                 initialValues.some((initial) => initial.value === option.value),
             );
-            if (filteredOptions.length !== selectedOptions.length) {
-                setSelectedOptions(filteredOptions);
+            if (filteredOptions.length !== stagedOptions.length) {
+                setStagedOptions(filteredOptions);
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,51 +227,63 @@ export const NestedSelect = ({
     // Instead of calling the update function individually whenever selectedOptions changes,
     // we use the useEffect hook to trigger the onUpdate function automatically when selectedOptions is updated.
     useEffect(() => {
-        if (onUpdate) {
-            onUpdate(selectedOptions);
-        }
+        onUpdate?.(selectedOptions);
         // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedOptions]);
+
+    useEffect(() => {
+        if (!showButtons) setSelectedOptions(stagedOptions);
+    }, [showButtons, stagedOptions]);
+
+    const onClickUpdateButton = useCallback(() => {
+        setSelectedOptions(stagedOptions);
+        setIsOpen(false);
+    }, [stagedOptions]);
+    const onClickCancelButton = useCallback(() => {
+        setStagedOptions(selectedOptions);
+        setIsOpen(false);
     }, [selectedOptions]);
 
     const handleOptionChange = useCallback(
         (option: SelectOption) => {
             let newSelectedOptions: SelectOption[];
-            if (selectedOptions.find((o) => o.value === option.value)) {
-                newSelectedOptions = selectedOptions.filter((o) => o.value !== option.value);
+            if (stagedOptions.find((o) => o.value === option.value)) {
+                newSelectedOptions = stagedOptions.filter((o) => o.value !== option.value);
             } else {
-                newSelectedOptions = [...selectedOptions, option];
+                newSelectedOptions = [...stagedOptions, option];
             }
-            setSelectedOptions(newSelectedOptions);
+            setStagedOptions(newSelectedOptions);
             if (!isMultiSelect) {
                 setIsOpen(false);
             }
         },
-        [selectedOptions, isMultiSelect],
+        [stagedOptions, isMultiSelect],
     );
 
     const addOptions = useCallback(
         (optionsToAdd: SelectOption[]) => {
-            const existingValues = new Set(selectedOptions.map((option) => option.value));
+            const existingValues = new Set(stagedOptions.map((option) => option.value));
             const filteredOptionsToAdd = optionsToAdd.filter((option) => !existingValues.has(option.value));
             if (filteredOptionsToAdd.length) {
-                const newSelectedOptions = [...selectedOptions, ...filteredOptionsToAdd];
-                setSelectedOptions(newSelectedOptions);
+                const newSelectedOptions = [...stagedOptions, ...filteredOptionsToAdd];
+                setStagedOptions(newSelectedOptions);
             }
         },
-        [selectedOptions],
+        [stagedOptions],
     );
 
     const removeOptions = useCallback(
         (optionsToRemove: SelectOption[]) => {
-            const newValues = selectedOptions.filter(
+            const newValues = stagedOptions.filter(
                 (selectedOption) => !optionsToRemove.find((o) => o.value === selectedOption.value),
             );
-            setSelectedOptions(newValues);
+            setStagedOptions(newValues);
         },
-        [selectedOptions],
+        [stagedOptions],
     );
 
     const handleClearSelection = useCallback(() => {
+        setStagedOptions([]);
         setSelectedOptions([]);
         setIsOpen(false);
         if (onUpdate) {
@@ -314,7 +330,7 @@ export const NestedSelect = ({
                                 {rootOptions.map((option) => (
                                     <NestedOption
                                         key={option.value}
-                                        selectedOptions={selectedOptions}
+                                        selectedOptions={stagedOptions}
                                         option={option}
                                         parentValueToOptions={parentValueToOptions}
                                         handleOptionChange={handleOptionChange}
@@ -322,13 +338,16 @@ export const NestedSelect = ({
                                         removeOptions={removeOptions}
                                         loadData={loadData}
                                         isMultiSelect={isMultiSelect}
-                                        setSelectedOptions={setSelectedOptions}
+                                        setSelectedOptions={setStagedOptions}
                                         areParentsSelectable={areParentsSelectable}
                                         isLoadingParentChildList={isLoadingParentChildList}
                                         hideParentCheckbox={hideParentCheckbox}
                                     />
                                 ))}
                             </OptionList>
+                            {showButtons && (
+                                <DropdownFooter onUpdate={onClickUpdateButton} onCancel={onClickCancelButton} />
+                            )}
                         </DropdownContainer>
                     );
                 }}

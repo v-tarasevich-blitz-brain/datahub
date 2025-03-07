@@ -1,8 +1,9 @@
 import { useAggregateAcrossEntitiesQuery } from '@src/graphql/search.generated';
-import { FacetFilterInput } from '@src/types.generated';
+import { EntityType, FacetFilterInput } from '@src/types.generated';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FeildFacetState, FieldName, FieldToFacetStateMap } from '../types';
 import { useSearchFiltersContext } from '../SearchFiltersContext';
+import { ENTITY_SUB_TYPE_FILTER_NAME } from '../../utils/constants';
 
 interface DynamicFacetsUpdaterProps {
     fieldNames: FieldName[];
@@ -31,13 +32,27 @@ function FieldFacetUpdater({ fieldName, query, onFieldFacetUpdated }: FieldFacet
         [fieldName, fieldToAppliedFiltersMap],
     );
 
+    const [entityTypes, filters] = useMemo(() => {
+        const entityTypes = appliedFiltersExludingCurrentField
+            .filter((filter) => filter.field === ENTITY_SUB_TYPE_FILTER_NAME)
+            .map((filter) => filter.values)
+            .flat()
+            .filter((value): value is EntityType => !!value);
+
+        const anotherFilters = appliedFiltersExludingCurrentField.filter(
+            (filter) => filter.field !== ENTITY_SUB_TYPE_FILTER_NAME,
+        );
+
+        return [entityTypes, anotherFilters];
+    }, [appliedFiltersExludingCurrentField]);
+
     const { data, loading } = useAggregateAcrossEntitiesQuery({
         variables: {
             input: {
-                types: [],
+                types: entityTypes,
                 query: query,
                 // TODO:: add dynamic condition
-                orFilters: [{ and: appliedFiltersExludingCurrentField }],
+                orFilters: [{ and: filters }],
                 facets: [fieldName],
             },
         },

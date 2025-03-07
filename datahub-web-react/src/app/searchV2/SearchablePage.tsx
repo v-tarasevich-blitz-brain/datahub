@@ -137,31 +137,28 @@ export const SearchablePage = ({ children }: Props) => {
         }
     }, FIFTH_SECOND_IN_MS);
 
-
-    const autoCompleteWithFilters = debounce((query: string) =>{
+    const autoCompleteWithFilters = debounce((query: string) => {
         // TODO:: show initial state (with empty request)?
         if (query.trim() === '') return null;
 
-
-        const filters = Array.from(appliedFilters.entries()).map(([key, value]) => value.filters).flat().filter(filter => filter.values?.length)
-
+        const filters = Array.from(appliedFilters.values())
+            .flatMap((value) => value.filters)
+            .filter((filter) => filter.values?.length);
 
         getAutoCompleteResults({
             variables: {
                 input: {
                     query,
                     viewUrn,
-                    orFilters: generateOrFilters(UnionType.AND, filters)
+                    orFilters: generateOrFilters(UnionType.AND, filters),
                 },
             },
         });
-
     }, FIFTH_SECOND_IN_MS);
-
 
     useEffect(() => {
         autoCompleteWithFilters(searchQuery);
-    }, [appliedFilters, searchQuery])
+    }, [appliedFilters, searchQuery]);
 
     // Load correct autocomplete results on initial page load.
     useEffect(() => {
@@ -193,7 +190,10 @@ export const SearchablePage = ({ children }: Props) => {
                 onSearch={search}
                 onQueryChange={setSearchQuery}
                 entityRegistry={entityRegistry}
-                onFilter={(filters) => {setAppliedFilters(filters); console.log('>>> onFilter', filters)}}
+                onFilter={(filters) => {
+                    setAppliedFilters(filters);
+                    console.log('>>> onFilter', filters);
+                }}
             />
             <BodyBackground $isShowNavBarRedesign={isShowNavBarRedesign} />
             <Body>

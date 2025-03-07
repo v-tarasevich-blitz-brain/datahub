@@ -1,7 +1,7 @@
 import { FeildFacetState } from '@src/app/searchV2/filtersPrototype/types';
 import { Entity, EntityType } from '@src/types.generated';
 import { useMemo } from 'react';
-import { EntitySelectOption } from '../types';
+import { BaseEntitySelectOption } from '../types';
 import useConvertEntitiesToOptions from './useEntitiesToOptions';
 import useSearch from './useSearch';
 
@@ -17,7 +17,7 @@ export default function useOptions(
     query: string,
     entityTypes: EntityType[],
     entityRender: (entity: Entity) => React.ReactNode,
-): EntitySelectOption[] {
+): BaseEntitySelectOption[] {
     const convertEntiteisToOptions = useConvertEntitiesToOptions();
 
     const { data: searchResponse, loading: searchResponseLoading } = useSearch(query, entityTypes);

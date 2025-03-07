@@ -1,15 +1,8 @@
 import { Text } from '@src/alchemy-components';
 import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';
 import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
-import { Entity, EntityType } from '@src/types.generated';
+import { Entity } from '@src/types.generated';
 import styled from 'styled-components';
-import { FieldFilterComponentProps } from '../types';
-import GenericEntityFilter from './entityFilters/GenericEntityFilter';
-import { memo, useCallback } from 'react';
-
-interface PlatformLabelProps {
-    entity: Entity;
-}
 
 const Container = styled.div`
     display: flex;
@@ -28,6 +21,7 @@ const IconAndNameContainer = styled.div`
     text-overflow: ellipsis;
     text-wrap: nowrap;
     align-items: center;
+    padding-right: 8px;
 `;
 
 const IconWrapper = styled.div`
@@ -40,7 +34,17 @@ const IconWrapper = styled.div`
     }
 `;
 
-function PlatformLabel({ entity }: PlatformLabelProps) {
+const Name = styled.div`
+    max-width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+`;
+
+interface Props {
+    entity: Entity;
+}
+
+export function EntityIconWithName({ entity }: Props) {
     const entityRegistry = useEntityRegistryV2();
 
     const displayName = entityRegistry.getDisplayName(entity.type, entity);
@@ -51,21 +55,10 @@ function PlatformLabel({ entity }: PlatformLabelProps) {
                 <IconWrapper>
                     <EntityIconRenderer entity={entity} size={16} />
                 </IconWrapper>
-                <Text type="span">{displayName}</Text>
+                <Name>
+                    <Text type="span">{displayName}</Text>
+                </Name>
             </IconAndNameContainer>
         </Container>
-    );
-}
-
-export default function PlatformEntityFilter(props: FieldFilterComponentProps) {
-    const renderEntity = useCallback((entity: Entity) => <PlatformLabel entity={entity} />, []);
-
-    return (
-        <GenericEntityFilter
-            {...props}
-            renderEntity={renderEntity}
-            entityTypes={[EntityType.DataPlatform]}
-            filterName="Platforms"
-        />
     );
 }

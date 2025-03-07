@@ -1,6 +1,6 @@
 import { AggregationMetadata, CorpUser, Entity, EntityType } from '@src/types.generated';
-import { FieldFilterComponentProps } from '../types';
-import GenericEntityFilter from './entityFilters/GenericEntityFilter';
+import { FieldFilterComponentProps } from '../../types';
+import BaseEntityFilter from '../BaseEntityFilter/BaseEntityFilter';
 import React, { memo, useCallback } from 'react';
 import { EntityIconRenderer } from '@src/app/entityV2/shared/components/AutoCompleteResult/components/icon/DefaultEntityIcon';
 import styled from 'styled-components';
@@ -77,7 +77,7 @@ export default function OwnerFilter(props: FieldFilterComponentProps) {
     const renderEntity = useCallback((entity: Entity) => <OwnerLabel entity={entity} />, []);
 
     return (
-        <GenericEntityFilter
+        <BaseEntityFilter
             {...props}
             renderEntity={renderEntity}
             entityTypes={[EntityType.CorpUser, EntityType.CorpGroup]}

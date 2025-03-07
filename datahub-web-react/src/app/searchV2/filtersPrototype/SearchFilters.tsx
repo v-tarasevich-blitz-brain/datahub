@@ -1,24 +1,24 @@
-import { memo, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import DynamicFacetsUpdater from './defaults/DynamicFacetsUpdater';
+import filterRegistry from './FilterRegistry';
 import FiltersRenderingRunner from './FiltersRenderingRunner';
 import { SearchFiltersProvider } from './SearchFiltersContext';
 import { FieldToFacetStateMap, FiltersAppliedHandler } from './types';
-import filterRegistry from './FilterRegistry';
-import PlatformEntityFilter from './filters/PlatformFilter';
+// import PlatformEntityFilter from './filters/PlatformFilter/PlatformFilter';
 import {
     DOMAINS_FILTER_NAME,
     ENTITY_SUB_TYPE_FILTER_NAME,
-    FIELD_TAGS_FILTER_NAME,
     OWNERS_FILTER_NAME,
     PLATFORM_FILTER_NAME,
     TAGS_FILTER_NAME,
 } from '../utils/constants';
-import OwnerFilter from './filters/OwnerFilter';
-import TagFilter from './filters/TagFilter';
+import { DomainFilter, EntityTypeFilter, OwnerFilter, PlatformEntityFilter, TagFilter } from './filters';
+// import OwnerFilter from './filters/OwnerFilter/OwnerFilter';
+// import TagFilter from './filters/TagFilter/TagFilter';
 // import DomainFilter from './defaults/filters/DomainFilter';
-import EntityTypeFilter from './filters/EntityTypeFilter/EntityTypeFilter';
-import DomainFilter from './filters/DomainFilter/DomainFilter';
+// import EntityTypeFilter from './filters/EntityTypeFilter/EntityTypeFilter';
+// import DomainFilter from './filters/DomainFilter/DomainFilter';
 
 const Container = styled.div`
     display: flex;
