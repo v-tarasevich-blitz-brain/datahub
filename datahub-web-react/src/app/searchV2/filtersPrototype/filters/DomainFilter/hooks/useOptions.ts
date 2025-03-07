@@ -35,6 +35,7 @@ export default function useOptions(
 
         const mergedEntities = mergeArraysPreferencingLast(entities, entitiesFromAggregations, (entity) => entity.urn);
         // debugger;
+        console.log('>>> mergedEntities domains', { mergedEntities, entities, entitiesFromAggregations });
 
         const domains = mergedEntities.filter((entity): entity is Domain => entity.type === EntityType.Domain);
         const allParentUrns = domains

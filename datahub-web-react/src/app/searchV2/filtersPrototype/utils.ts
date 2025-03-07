@@ -22,7 +22,9 @@ export function mergeArraysPreferencingLast<T>(
     arrayB: Array<T>,
     keyAccessor?: (item: T) => any,
 ): Array<T> {
-    const keysOfArrayB = keyAccessor ? arrayB.map(keyAccessor) : arrayB;
+    const applyAccessor = (item: T) => (keyAccessor ? keyAccessor(item) : item);
 
-    return [...arrayA.filter((item) => keysOfArrayB.includes(keyAccessor ? keyAccessor(item) : item)), ...arrayB];
+    const keysOfArrayB = arrayB.map(applyAccessor);
+
+    return [...arrayA.filter((item) => !keysOfArrayB.includes(applyAccessor(item))), ...arrayB];
 }
