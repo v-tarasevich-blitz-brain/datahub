@@ -1,19 +1,16 @@
-import { Button, Text } from '@components';
+import { Text } from '@components';
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Dropdown from '../Dropdown/Dropdown';
+import { useOverlayClassStackContext } from '../Utils/OverlayClassContext/OverlayClassContext';
 import {
     ActionButtonsContainer,
     Container,
     DropdownContainer,
-    FooterBase,
     LabelContainer,
     OptionContainer,
     OptionLabel,
     OptionList,
-    SearchIcon,
-    SearchInput,
-    SearchInputContainer,
-    SelectAllOption,
     SelectBase,
     SelectLabel,
     SelectLabelContainer,
@@ -21,14 +18,13 @@ import {
     StyledClearButton,
     StyledIcon,
 } from './components';
+import { basicSelectDefaults } from './defaults';
+import DropdownFooter from './private/dropdown/DropdownFooter';
+import DropdownSearchBar from './private/dropdown/DropdownSearchBar';
+import DropdownSelectAllOption from './private/dropdown/DropdownSelectAllOption';
 import SelectLabelRenderer from './private/SelectLabelRenderer/SelectLabelRenderer';
 import { ActionButtonsProps, SelectOption, SelectProps } from './types';
 import { getFooterButtonSize } from './utils';
-import { basicSelectDefaults, selectDefaults } from './defaults';
-import Dropdown from '../Dropdown/Dropdown';
-import DropdownSearchBar from './private/dropdown/DropdownSearchBar';
-import DropdownFooter from './private/dropdown/DropdownFooter';
-import DropdownSelectAllOption from './private/dropdown/DropdownSelectAllOption';
 
 const SelectActionButtons = ({
     selectedValues,
@@ -74,11 +70,13 @@ export const BasicSelect = <OptionType extends SelectOption>({
     className,
     ...props
 }: SelectProps<OptionType>) => {
+    const overlayClassStack = useOverlayClassStackContext();
+    const overlayClasses = useMemo(() => overlayClassStack.join(' '), [overlayClassStack]);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [selectedValues, setSelectedValues] = useState<string[]>(initialValues || values);
     const [tempValues, setTempValues] = useState<string[]>(values);
-    const selectRef = useRef<HTMLDivElement>(null);
     const [areAllSelected, setAreAllSelected] = useState(false);
 
     useEffect(() => {
@@ -104,19 +102,6 @@ export const BasicSelect = <OptionType extends SelectOption>({
     }, [options, searchQuery, searchFilter]);
 
     useEffect(() => onSearchQueryChanged?.(searchQuery), [searchQuery, onSearchQueryChanged]);
-
-    const handleDocumentClick = useCallback((e: MouseEvent) => {
-        if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
-            // setIsOpen(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        document.addEventListener('click', handleDocumentClick);
-        return () => {
-            document.removeEventListener('click', handleDocumentClick);
-        };
-    }, [handleDocumentClick]);
 
     const handleSelectClick = useCallback(() => {
         if (!isDisabled && !isReadOnly) {
@@ -184,15 +169,12 @@ export const BasicSelect = <OptionType extends SelectOption>({
     };
 
     return (
-        <Container ref={selectRef} size={size || 'md'} width={props.width} className={className}>
+        <Container size={size || 'md'} width={props.width} className={className}>
             {label && <SelectLabel onClick={handleSelectClick}>{label}</SelectLabel>}
             <Dropdown
                 open={isOpen}
-                overlayClassName="autocomplete-click-outside-ignore"
-                onOpenChange={(open) => {
-                    setIsOpen(open);
-                    // console.log('>>> onOpenChange', open);
-                }}
+                overlayClassName={overlayClasses}
+                onOpenChange={(open) => setIsOpen(open)}
                 dropdownRender={() => {
                     return (
                         <DropdownContainer>

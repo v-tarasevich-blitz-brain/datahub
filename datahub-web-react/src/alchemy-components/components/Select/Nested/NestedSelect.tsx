@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Icon, Pill, colors } from '@components';
 
@@ -24,6 +24,7 @@ import Dropdown from '../../Dropdown/Dropdown';
 import DropdownFooter from '../private/dropdown/DropdownFooter';
 import SelectLabelRenderer from '../private/SelectLabelRenderer/SelectLabelRenderer';
 import DropdownSearchBar from '../private/dropdown/DropdownSearchBar';
+import { useOverlayClassStackContext } from '../../Utils/OverlayClassContext/OverlayClassContext';
 
 const NO_PARENT_VALUE = 'no_parent_value';
 
@@ -186,6 +187,9 @@ export const NestedSelect = ({
     const [selectedOptions, setSelectedOptions] = useState<SelectOption[]>(initialValues);
     const [stagedOptions, setStagedOptions] = useState<SelectOption[]>(initialValues);
 
+    const overlayClassStack = useOverlayClassStackContext();
+    const overlayClasses = useMemo(() => overlayClassStack.join(' '), [overlayClassStack]);
+
     useEffect(() => {
         if (initialValues && shouldAlwaysSyncParentValues) {
             const filteredOptions = stagedOptions.filter((option) =>
@@ -293,7 +297,7 @@ export const NestedSelect = ({
         <Container size={size || 'md'} width={props.width || 255}>
             <Dropdown
                 open={isOpen}
-                overlayClassName="autocomplete-click-outside-ignore"
+                overlayClassName={overlayClasses}
                 onOpenChange={(open) => setIsOpen(open)}
                 dropdownRender={() => {
                     return (

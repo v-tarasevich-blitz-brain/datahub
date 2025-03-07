@@ -1,23 +1,16 @@
-import { AutoComplete as AntdAutoComplete } from 'antd';
-import React, { createContext, Ref, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { colors, spacing } from '@src/alchemy-components/theme';
 import radius from '@src/alchemy-components/theme/foundations/radius';
+import { AutoComplete as AntdAutoComplete } from 'antd';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import ClickOutside from '../Utils/ClickOutside';
 import { BOX_SHADOW, ChildrenWrapper, DropdownWrapper } from './components';
 import { AutoCompleteProps } from './types';
-import { createPortal } from 'react-dom';
-import ClickOutside from '../Utils/ClickOutside';
-// import ClickOutside from '@src/app/shared/ClickOutside';
+import { OverlayClassProvider, useOverlayClassStackContext } from '../Utils/OverlayClassContext/OverlayClassContext';
 
 // Additional offset to handle wrapper's padding (when `showWrapping` is enabled)
 const DROPDOWN_ALIGN_WITH_WRAPPING = { offset: [0, -8] };
 
-const AutoCompleteContext = createContext<{
-    portal: HTMLElement | null;
-    test: string;
-}>({
-    portal: null,
-    test: 'testString',
-});
+const DROPDOWN_OVERLAY_CLASS_NAME = 'autocomplete-click-outside-ignore';
 
 export default function AutoComplete({
     children,
@@ -27,39 +20,33 @@ export default function AutoComplete({
     onDropdownVisibleChange,
     ...props
 }: React.PropsWithChildren<AutoCompleteProps>) {
+    const overlayClassStack = useOverlayClassStackContext();
+    const overlayClasses = useMemo(
+        () => [...overlayClassStack, DROPDOWN_OVERLAY_CLASS_NAME].join(' '),
+        [overlayClassStack],
+    );
+
     const [internalOpen, setInternalOpen] = useState<boolean>(false);
     const { open } = props;
 
     useEffect(() => {
-        // console.log('>>> Sync internal and open', {open})
         if (open !== undefined) setInternalOpen(open);
     }, [open]);
 
     const updateOpenState = useCallback(
         (isOpen) => {
-            // if (isOpen === true) debugger;
-            // console.log('>>> updateOpenState CALL', {isOpen, open});
             if (open === undefined) setInternalOpen(isOpen);
-            // if (open !== undefined) setInternalOpen(open);
-            // console.trace('>>> updateOpenState trace');
             onDropdownVisibleChange?.(isOpen);
         },
         [open, onDropdownVisibleChange],
     );
 
-    // // const portalRef = useRef<HTMLDivElement>(null);
-    // const subPortalRef = useRef<HTMLDivElement>(null);
-
-    // console.log('>>> autocomplete', { internalOpen, open });
     return (
         <ClickOutside
-            onClickOutside={() => {
-                // console.log('>>> onClickOutside CALL')
-                updateOpenState(false);
-            }}
-            wrapperClassName="autocomplete"
+            onClickOutside={() => updateOpenState(false)}
             outsideSelector=".autocomplete-click-outside,.view-select-popover"
-            ignoreSelector=".autocomplete-click-outside-ignore"
+            // ignore content in the dropdown
+            ignoreSelector={`.${DROPDOWN_OVERLAY_CLASS_NAME}`}
         >
             <AntdAutoComplete
                 {...props}
@@ -68,9 +55,11 @@ export default function AutoComplete({
                 data-testid={dataTestId}
                 dropdownRender={(menu) => {
                     return (
-                        <DropdownWrapper className="autocomplete-click-outside-ignore">
-                            {props?.dropdownRender?.(menu) ?? menu}
-                        </DropdownWrapper>
+                        <OverlayClassProvider overlayClassName={DROPDOWN_OVERLAY_CLASS_NAME}>
+                            <DropdownWrapper className={overlayClasses}>
+                                {props?.dropdownRender?.(menu) ?? menu}
+                            </DropdownWrapper>
+                        </OverlayClassProvider>
                     );
                 }}
                 dropdownAlign={{ ...(showWrapping ? DROPDOWN_ALIGN_WITH_WRAPPING : {}) }}
@@ -90,15 +79,12 @@ export default function AutoComplete({
                         if (!event.target.closest('.autocomplete-children')) return null;
 
                         if (event.target.closest('.autocomplete-click-outside,.view-select-popover')) {
-                            // console.log('>>> updateOpenState true IGNORED');
                             return null;
                         }
                     }
-                    // console.log('>>> updateOpenState true');
                     updateOpenState(true);
                 }}
                 onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-                    // console.log('>>> onKeyDown', event)
                     if (event.key === 'Escape') {
                         if (internalOpen) updateOpenState(false);
                     }
