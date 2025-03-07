@@ -1,49 +1,73 @@
 import { SelectOption } from '@src/alchemy-components/components/Select/Nested/types';
-import { FILTER_DELIMITER } from '@src/app/search/utils/constants';
 import { FeildFacetState } from '@src/app/searchV2/filtersPrototype/types';
 import { mergeArraysPreferencingLast } from '@src/app/searchV2/filtersPrototype/utils';
-import { useEntityRegistryV2 } from '@src/app/useEntityRegistry';
-import { Domain, Entity, EntityType } from '@src/types.generated';
+import { Domain, EntityType } from '@src/types.generated';
 import { useMemo } from 'react';
+import { isDomain } from '../utils';
+
+function getLongestArray<T>(arrays: T[][]): T[] | null {
+    if (arrays.length === 0) return null; // Return null if the input is empty
+
+    return arrays.reduce((longest, current) => (current.length > longest.length ? current : longest), []);
+}
 
 export default function useOptions(
     facetState: FeildFacetState | undefined,
-    entities: Entity[],
+    domainsFromAppliedFilters: Domain[],
     renderLabel: (domain: Domain) => React.ReactNode,
 ) {
-    const entityRegistry = useEntityRegistryV2();
-
-    // const valuesFromAggregations = useMemo(
-    //     () => facetState?.facet?.aggregations.map((aggregation) => aggregation.value) ?? [],
-    //     [facetState],
-    // );
-
-    // // prefer values from aggregations to save their ordering
-    // const uniqueValues = useMemo(
-    //     () => [...values.filter((value) => !valuesFromAggregations.includes(value)), ...valuesFromAggregations],
-    //     [values, valuesFromAggregations],
-    // );
-
     const options: SelectOption[] = useMemo(() => {
-        const entitiesFromAggregations =
-            facetState?.facet?.aggregations
-                .filter((aggregation) => aggregation.count > 0)
-                .map((aggregation) => aggregation.entity)
-                .filter((entity): entity is Entity => !!entity) ?? [];
+        const aggregations = facetState?.facet?.aggregations ?? [];
+        const filteredAggregations = aggregations.filter((aggregation) => aggregation.count > 0);
+        const entitiesFromAggregations = filteredAggregations.map((aggregation) => aggregation.entity);
+        const domainsFromAggregations = entitiesFromAggregations.filter(isDomain) ?? [];
 
-        // const uniqueEntities = ()
+        const mergedDomains = mergeArraysPreferencingLast(
+            domainsFromAppliedFilters,
+            domainsFromAggregations,
+            (entity) => entity.urn,
+        );
 
-        const mergedEntities = mergeArraysPreferencingLast(entities, entitiesFromAggregations, (entity) => entity.urn);
-        // debugger;
-        console.log('>>> mergedEntities domains', { mergedEntities, entities, entitiesFromAggregations });
+        // extract parent domains
+        const allParentDomainsCombinations = mergedDomains
+            .map((domain) => (domain?.parentDomains?.domains ?? []).filter(isDomain))
+            .filter((domains) => domains.length !== 0);
 
-        const domains = mergedEntities.filter((entity): entity is Domain => entity.type === EntityType.Domain);
-        const allParentUrns = domains
-            .map((domain) => domain.parentDomains?.domains ?? [])
-            .flat()
-            .map((domain) => domain.urn);
+        const a = Object.groupBy(allParentDomainsCombinations, (parentDomains) => parentDomains[0].urn);
+        const longestParentDomainsStacks = Object.values(a)
+            .filter((groupedDomains) => !!groupedDomains)
+            .map((groupedDomains) => getLongestArray(groupedDomains))
+            .filter((domains) => !!domains);
 
-        return domains.map((domain) => {
+        const parentDomains = longestParentDomainsStacks
+            .map((domains) => {
+                let stack: Domain[] = [];
+
+                return domains.map((domain, index) => {
+                    const newDomain: Domain = {
+                        ...domain,
+                        parentDomains: {
+                            count: stack.length,
+                            domains: stack,
+                        },
+                    };
+                    stack = [...stack, newDomain];
+                    return newDomain;
+                });
+            })
+            .flat();
+
+        mergedDomains.forEach((domain) => {
+            const parentDomains = (domain.parentDomains?.domains ?? []).filter(isDomain);
+            if (parentDomains.length === 0) return;
+        });
+
+        const domains = mergedDomains.filter((entity): entity is Domain => entity.type === EntityType.Domain);
+        const allParentUrns = parentDomains.map((domain) => domain.urn);
+
+        const allDomains = mergeArraysPreferencingLast(parentDomains, domains, (entity) => entity.urn);
+
+        return allDomains.map((domain) => {
             const countOfParentDomains = domain.parentDomains?.count ?? 0;
             const hasParentDomains = countOfParentDomains > 0;
             const lastParentDomain = hasParentDomains
@@ -60,7 +84,7 @@ export default function useOptions(
                 isParent: hasChildren,
             };
         });
-    }, [entityRegistry, facetState, entities, renderLabel]);
+    }, [facetState, domainsFromAppliedFilters, renderLabel]);
 
     return options;
 }

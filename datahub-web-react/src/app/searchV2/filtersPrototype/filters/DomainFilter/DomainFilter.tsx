@@ -1,6 +1,6 @@
 import { NestedSelect } from '@src/alchemy-components/components/Select/Nested/NestedSelect';
 import { SelectOption } from '@src/alchemy-components/components/Select/Nested/types';
-import { Domain, Entity, FilterOperator } from '@src/types.generated';
+import { Domain, Entity, EntityType, FilterOperator } from '@src/types.generated';
 import { useMemo, useState } from 'react';
 import { FieldFilterComponentProps } from '../../types';
 import { EntityIconWithName } from '../BaseEntityFilter/components/EntityIconWithName';
@@ -8,7 +8,7 @@ import useValues from '../hooks/useValues';
 import useOptions from './hooks/useOptions';
 
 export default function DomainFilter({ fieldName, facetState, appliedFilters, onUpdate }: FieldFilterComponentProps) {
-    const [entities, setEntities] = useState<Entity[]>([]);
+    const [entities, setEntities] = useState<Domain[]>([]);
 
     const values = useValues(appliedFilters);
 
@@ -19,9 +19,9 @@ export default function DomainFilter({ fieldName, facetState, appliedFilters, on
 
     const onSelectUpdate = (selectedOptions: SelectOption[]) => {
         const selectedValues = selectedOptions.map((option) => option.value);
-        const selectedEntities: Entity[] = selectedOptions
+        const selectedEntities: Domain[] = selectedOptions
             .map((option) => option.entity)
-            .filter((entity): entity is Entity => !!entity);
+            .filter((entity): entity is Domain => !!entity && entity.type === EntityType.Domain);
 
         setEntities(selectedEntities);
 
