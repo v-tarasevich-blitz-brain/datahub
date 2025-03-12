@@ -26,33 +26,32 @@ export default function AutoComplete({
         [overlayClassStack],
     );
 
-    const [internalOpen, setInternalOpen] = useState<boolean>(false);
-    const { open } = props;
+    // const [internalOpen, setInternalOpen] = useState<boolean>(false);
 
-    useEffect(() => {
-        if (open !== undefined) setInternalOpen(open);
-    }, [open]);
+    // useEffect(() => {
+    //     if (open !== undefined) setInternalOpen(open);
+    // }, [open]);
 
-    const updateOpenState = useCallback(
-        (isOpen) => {
-            if (open === undefined) setInternalOpen(isOpen);
-            onDropdownVisibleChange?.(isOpen);
-        },
-        [open, onDropdownVisibleChange],
-    );
+    // const updateOpenState = useCallback(
+    //     (isOpen) => {
+    //         // if (open === undefined) setInternalOpen(isOpen);
+    //         onDropdownVisibleChange?.(isOpen);
+    //     },
+    //     [open, onDropdownVisibleChange],
+    // );
 
     return (
         <ClickOutside
-            onClickOutside={() => updateOpenState(false)}
+            onClickOutside={() => onDropdownVisibleChange?.(false)}
             outsideSelector=".autocomplete-click-outside,.view-select-popover"
             // ignore content in the dropdown
             ignoreSelector={`.${DROPDOWN_OVERLAY_CLASS_NAME}`}
         >
             <AntdAutoComplete
                 {...props}
-                open={internalOpen}
                 listHeight={dropdownContentHeight}
                 data-testid={dataTestId}
+                onDropdownVisibleChange={onDropdownVisibleChange}
                 dropdownRender={(menu) => {
                     return (
                         <OverlayClassProvider overlayClassName={DROPDOWN_OVERLAY_CLASS_NAME}>
@@ -62,37 +61,37 @@ export default function AutoComplete({
                         </OverlayClassProvider>
                     );
                 }}
-                dropdownAlign={{ ...(showWrapping ? DROPDOWN_ALIGN_WITH_WRAPPING : {}) }}
-                dropdownStyle={{
-                    ...(showWrapping
-                        ? {
-                              padding: spacing.xsm,
-                              borderRadius: `${radius.none} ${radius.none} ${radius.lg} ${radius.lg}`,
-                              backgroundColor: colors.gray[1500],
-                              boxShadow: BOX_SHADOW,
-                          }
-                        : { borderRadius: radius.lg }),
-                    ...(props?.dropdownStyle ?? {}),
-                }}
+                dropdownMatchSelectWidth={664}
+                // dropdownAlign={{ ...(showWrapping ? DROPDOWN_ALIGN_WITH_WRAPPING : {}) }}
+                // dropdownStyle={{
+                //     // ...(showWrapping
+                //     //     ? {
+                //     //           padding: spacing.xsm,
+                //     //           borderRadius: `${radius.none} ${radius.none} ${radius.lg} ${radius.lg}`,
+                //     //           backgroundColor: colors.gray[1500],
+                //     //           boxShadow: BOX_SHADOW,
+                //     //       }
+                //     //     : { borderRadius: radius.lg }),
+                //     ...(props?.dropdownStyle ?? {}),
+                // }}
                 onClick={(event) => {
                     if (event.target instanceof Element) {
-                        if (!event.target.closest('.autocomplete-children')) return null;
+                        if (event.target.closest(`.${DROPDOWN_OVERLAY_CLASS_NAME}`)) event.stopPropagation();
+                    }
 
-                        if (event.target.closest('.autocomplete-click-outside,.view-select-popover')) {
-                            return null;
-                        }
-                    }
-                    updateOpenState(true);
+                    //     if (event.target.closest('.autocomplete-click-outside,.view-select-popover')) {
+                    //         return null;
+                    //     }
+                    // }
+                    // updateOpenState(true);
                 }}
-                onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-                    if (event.key === 'Escape') {
-                        if (internalOpen) updateOpenState(false);
-                    }
-                }}
+                // onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                //     if (event.key === 'Escape') {
+                //         if (internalOpen) updateOpenState(false);
+                //     }
+                // }}
             >
-                <ChildrenWrapper $open={internalOpen} $showWrapping={showWrapping} className="autocomplete-children">
-                    {children}
-                </ChildrenWrapper>
+                {children}
             </AntdAutoComplete>
         </ClickOutside>
     );

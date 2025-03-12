@@ -1,6 +1,6 @@
 import React from 'react';
 import { DefaultOptionType } from 'antd/lib/select';
-import { InputProps } from 'antd';
+import { AlignType } from 'rc-trigger/lib/interface';
 
 export type ValueType = string;
 
@@ -27,6 +27,7 @@ export interface AutoCompleteProps {
     dropdownRender?: (menu: React.ReactElement) => React.ReactElement | undefined;
     notFoundContent?: React.ReactNode;
 
+    dropdownAlign?: AlignType;
     style?: React.CSSProperties;
     dropdownStyle?: React.CSSProperties;
 
