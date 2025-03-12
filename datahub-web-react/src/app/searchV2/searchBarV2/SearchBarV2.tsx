@@ -5,32 +5,33 @@ import { Input, Skeleton } from 'antd';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
 import styled from 'styled-components/macro';
-import { EntityRegistry } from '../../entityRegistryContext';
-import { useListRecommendationsQuery } from '../../graphql/recommendations.generated';
-import { useQuickFiltersContext } from '../../providers/QuickFiltersContext';
-import { AutoCompleteResultForEntity, FacetFilterInput, ScenarioType } from '../../types.generated';
-import analytics, { Event, EventType } from '../analytics';
-import { useUserContext } from '../context/useUserContext';
-import { ANTD_GRAY_V2 } from '../entity/shared/constants';
-import { getEntityPath } from '../entity/shared/containers/profile/utils';
-import AutoCompleteResult from '../entityV2/shared/components/AutoCompleteResult/AutoCompleteResult';
-import AutocompleteFooter from '../entityV2/shared/components/AutoCompleteResult/AutocompleteFooter';
-import { REDESIGN_COLORS } from '../entityV2/shared/constants';
-import { ViewSelect } from '../entityV2/view/select/ViewSelect';
-import { V2_SEARCH_BAR_VIEWS } from '../onboarding/configV2/HomePageOnboardingConfig';
-import usePrevious from '../shared/usePrevious';
-import { useAppConfig, useIsShowSeparateSiblingsEnabled } from '../useAppConfig';
-import { CommandK } from './CommandK';
-import ViewAllSearchItem from './ViewAllSearchItem';
-import RecommendedOption from './autoComplete/RecommendedOption';
-import { EntityTypeLabel } from './autoComplete/SectionHeader';
-import SearchFilters from './filtersPrototype/SearchFilters';
-import { FiltersAppliedHandler } from './filtersPrototype/types';
-import useSearchViewAll from './useSearchViewAll';
-import { combineSiblingsInAutoComplete } from './utils/combineSiblingsInAutoComplete';
-import { EXACT_SEARCH_PREFIX } from './utils/constants';
-import filterSearchQuery from './utils/filterSearchQuery';
-import { getFiltersWithQuickFilter } from './utils/filterUtils';
+import { EntityRegistry } from '../../../entityRegistryContext';
+import { useListRecommendationsQuery } from '../../../graphql/recommendations.generated';
+import { useQuickFiltersContext } from '../../../providers/QuickFiltersContext';
+import { AutoCompleteResultForEntity, FacetFilterInput, ScenarioType } from '../../../types.generated';
+import analytics, { Event, EventType } from '../../analytics';
+import { useUserContext } from '../../context/useUserContext';
+import { ANTD_GRAY_V2 } from '../../entity/shared/constants';
+import { getEntityPath } from '../../entity/shared/containers/profile/utils';
+import AutoCompleteResult from '../../entityV2/shared/components/AutoCompleteResult/AutoCompleteResult';
+import AutocompleteFooter from '../../entityV2/shared/components/AutoCompleteResult/AutocompleteFooter';
+import { REDESIGN_COLORS } from '../../entityV2/shared/constants';
+import { ViewSelect } from '../../entityV2/view/select/ViewSelect';
+import { V2_SEARCH_BAR_VIEWS } from '../../onboarding/configV2/HomePageOnboardingConfig';
+import usePrevious from '../../shared/usePrevious';
+import { useAppConfig, useIsShowSeparateSiblingsEnabled } from '../../useAppConfig';
+import { CommandK } from '../CommandK';
+import ViewAllSearchItem from '../ViewAllSearchItem';
+import RecommendedOption from '../autoComplete/RecommendedOption';
+import { EntityTypeLabel } from '../autoComplete/SectionHeader';
+import SearchFilters from '../filtersPrototype/SearchFilters';
+import { FiltersAppliedHandler } from '../filtersPrototype/types';
+import useSearchViewAll from '../useSearchViewAll';
+import { combineSiblingsInAutoComplete } from '../utils/combineSiblingsInAutoComplete';
+import { EXACT_SEARCH_PREFIX } from '../utils/constants';
+import filterSearchQuery from '../utils/filterSearchQuery';
+import { getFiltersWithQuickFilter } from '../utils/filterUtils';
+import AutocompletePlaceholder from './components/AutocompletePlaceholder';
 
 const StyledAutoComplete = styled(AutoComplete)<{ $isShowNavBarRedesign?: boolean }>`
     width: 100%;
@@ -135,7 +136,7 @@ const SearchIcon = styled(SearchOutlined)<{ $isShowNavBarRedesign?: boolean }>`
 `;
 
 const SearchFitlersContainer = styled.div`
-    padding: 16px 8px;
+    /* padding: 16px 8px; */
 `;
 
 const DropdownContainer = styled.div`
@@ -246,6 +247,47 @@ export const SearchBarV2 = ({
 
     useEffect(() => setSelected(initialQuery), [initialQuery]);
 
+    // const { entities: recentlyViewedEntities, loading: isRecentlyViewedEntitiesLoading } = useRecentlyViewedEntities();
+    // const recentlyViewedEntitiesOptions = useMemo(() => {
+    //     if (recentlyViewedEntities.length === 0) return [];
+    //     return [
+    //         {
+    //             label: <EntityTypeLabel>You Recently Viewed</EntityTypeLabel>,
+    //             options: recentlyViewedEntities.map((entity) => {
+    //                 // const combinedSuggestion = combineSiblingsInAutoComplete(suggestion, {
+    //                 //     combineSiblings: finalCombineSiblings,
+    //                 // });
+
+    //                 return {
+    //                     value: entity.urn,
+    //                     label: (
+    //                         <AutoCompleteResult
+    //                             entity={entity}
+    //                             query={effectiveQuery}
+    //                             // siblings={finalCombineSiblings ? combinedEntity.matchedEntities : undefined}
+    //                         />
+    //                     ),
+    //                     type: entity.type,
+    //                     style: { padding: '0 8px' },
+    //                 };
+
+    //                 // return combinedSuggestion.combinedEntities.map((combinedEntity) => ({
+    //                 //     value: combinedEntity.entity.urn,
+    //                 //     label: (
+    //                 //         <AutoCompleteResult
+    //                 //             entity={entity}
+    //                 //             query={effectiveQuery}
+    //                 //             siblings={finalCombineSiblings ? combinedEntity.matchedEntities : undefined}
+    //                 //         />
+    //                 //     ),
+    //                 //     type: combinedEntity.entity.type,
+    //                 //     style: { padding: '0 8px' },
+    //                 // }));
+    //             }),
+    //         },
+    //     ];
+    // }, [recentlyViewedEntities]);
+
     const { data: recommendationData } = useListRecommendationsQuery({
         variables: {
             input: {
@@ -259,38 +301,6 @@ export const SearchBarV2 = ({
         skip: hideRecommendations || !userUrn,
     });
 
-    // const {data} = useGetSearchResultsForMultipleQuery()
-
-    const quickFilterAutoCompleteOption = useMemo(() => {
-        // if (!showQuickFilters) {
-        //     return null;
-        // }
-        // if (!showAutoCompleteResults) {
-        //     // If we've disabled showing any autocomplete results, we also hide the "Filter By" flow.
-        //     return null;
-        // }
-        // if (!quickFilters?.length) {
-        //     return null;
-        // }
-        return {
-            label: <EntityTypeLabel>Filter by</EntityTypeLabel>,
-            options: [
-                {
-                    value: 'quick-filter-unique-key',
-                    type: '',
-                    // label: <QuickFilters searchQuery={searchQuery} setIsDropdownVisible={setIsDropdownVisible} />,
-                    label: (
-                        <SearchFitlersContainer>
-                            <SearchFilters query={searchQuery ?? ''} />
-                        </SearchFitlersContainer>
-                    ),
-                    style: { padding: '8px', cursor: 'auto', pointerEvents: 'all' },
-                    // disabled: true,
-                },
-            ],
-        };
-    }, [searchQuery, quickFilters, showAutoCompleteResults, showQuickFilters]);
-
     const emptyQueryOptions = useMemo(() => {
         const moduleOptions =
             recommendationData?.listRecommendations?.modules?.map((module) => ({
@@ -301,7 +311,7 @@ export const SearchBarV2 = ({
         return moduleOptions;
     }, [recommendationData?.listRecommendations?.modules]);
 
-    const autoCompleteQueryOptions = useMemo(() => {
+    const viewAllResultsOptions = useMemo(() => {
         if (effectiveQuery === '' || !showViewAllResults) return [];
 
         return [
@@ -313,8 +323,29 @@ export const SearchBarV2 = ({
         ];
     }, [effectiveQuery, showViewAllResults]);
 
+    // const ViewAllResultsOptions = useMemo(() => {
+    //     if (effectiveQuery === '' || !showViewAllResults) return [];
+
+    //     return [
+    //         {
+    //             value: `${EXACT_SEARCH_PREFIX}${effectiveQuery}`,
+    //             label: <ViewAllSearchItem searchTarget={effectiveQuery} />,
+    //             type: EXACT_AUTOCOMPLETE_OPTION_TYPE,
+    //         },
+    //     ];
+    // }, [effectiveQuery, showViewAllResults]);
+
+    const isSearching = useMemo(() => {
+        const hasSearchQuery = searchQuery !== undefined && searchQuery !== '';
+        const hasAnyAppliedFilters = appliedFilters.length > 0;
+
+        return hasSearchQuery || hasAnyAppliedFilters;
+    }, [searchQuery, appliedFilters]);
+
+    const hasAutocompleteResults = useMemo(() => suggestions.length > 0, [suggestions.length]);
+
     const autoCompleteEntityOptions = useMemo(() => {
-        if (suggestions.length === 0) return [];
+        if (!hasAutocompleteResults) return [];
         return [
             {
                 label: <EntityTypeLabel>Best Matches</EntityTypeLabel>,
@@ -340,7 +371,7 @@ export const SearchBarV2 = ({
                     .flat(),
             },
         ];
-    }, [finalCombineSiblings, effectiveQuery, suggestions]);
+    }, [finalCombineSiblings, effectiveQuery, suggestions, hasAutocompleteResults]);
 
     const previousSelectedQuickFilterValue = usePrevious(selectedQuickFilter?.value);
 
@@ -364,20 +395,23 @@ export const SearchBarV2 = ({
     }, [searchViewAll]);
 
     const options = useMemo(() => {
-        const autoCompleteOptions =
-            showAutoCompleteResults && autoCompleteEntityOptions.length ? autoCompleteEntityOptions : emptyQueryOptions;
-        // const quickFilterOptions = quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
-        const quickFilterOptions = []; // quickFilterAutoCompleteOption ? [quickFilterAutoCompleteOption] : [];
-        const baseOptions: any[] = [...autoCompleteQueryOptions, ...quickFilterOptions, ...autoCompleteOptions];
-
-        if (showViewAllResults) {
+        if (showAutoCompleteResults) {
+            if (!hasAutocompleteResults) return [];
+            return [...viewAllResultsOptions, ...autoCompleteEntityOptions];
         }
-        return baseOptions;
+
+        return emptyQueryOptions;
+
+        // const autoCompleteOptions =
+        //     showAutoCompleteResults && autoCompleteEntityOptions.length ? autoCompleteEntityOptions : emptyQueryOptions;
+        // const baseOptions: any[] = [...autoCompleteQueryOptions, ...autoCompleteOptions];
+        // return baseOptions;
     }, [
+        hasAutocompleteResults,
         emptyQueryOptions,
         autoCompleteEntityOptions,
-        autoCompleteQueryOptions,
-        quickFilterAutoCompleteOption,
+        viewAllResultsOptions,
+        // recentlyViewedEntitiesOptions,
         showViewAllResults,
         showAutoCompleteResults,
         onClickExploreAll,
@@ -460,14 +494,17 @@ export const SearchBarV2 = ({
                     dropdownRender={(props) => {
                         return (
                             <DropdownContainer>
-                                <SearchFitlersContainer>
-                                    <SearchFilters query={searchQuery ?? ''} onFiltersApplied={onFiltersApplied} />
-                                </SearchFitlersContainer>
+                                {isSearching && (
+                                    <SearchFitlersContainer>
+                                        <SearchFilters query={searchQuery ?? ''} onFiltersApplied={onFiltersApplied} />
+                                    </SearchFitlersContainer>
+                                )}
                                 {props}
                                 <AutocompleteFooter />
                             </DropdownContainer>
                         );
                     }}
+                    notFoundContent={<AutocompletePlaceholder isSearching={isSearching} />}
                     onSelect={(value, option) => {
                         // If the autocomplete option type is NOT an entity, then render as a normal search query.
                         if (
@@ -528,7 +565,7 @@ export const SearchBarV2 = ({
                         <StyledSearchBar
                             onFocusCapture={(event) => {
                                 if (event.target instanceof Element) {
-                                    if (event.target.closest('.autocomplete-click-outside')) return null;
+                                    if (event.target.closest('.view-select-container')) return null;
                                 }
                                 setIsDropdownVisible(true);
                             }}
@@ -571,7 +608,7 @@ export const SearchBarV2 = ({
                             $placeholderColor={placeholderColor}
                         />
                         {viewsEnabled && (
-                            <ViewSelectContainer id={V2_SEARCH_BAR_VIEWS} className="autocomplete-click-outside">
+                            <ViewSelectContainer id={V2_SEARCH_BAR_VIEWS} className="view-select-container">
                                 <ViewSelect onOpenChange={() => setIsDropdownVisible(false)} />
                             </ViewSelectContainer>
                         )}

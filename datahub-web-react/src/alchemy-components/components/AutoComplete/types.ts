@@ -1,8 +1,11 @@
 import React from 'react';
 import { DefaultOptionType } from 'antd/lib/select';
+import { InputProps } from 'antd';
 
 export type ValueType = string;
+
 export type OptionType = DefaultOptionType;
+
 export interface AutoCompleteProps {
     dataTestId?: string;
     className?: string;
@@ -22,6 +25,7 @@ export interface AutoCompleteProps {
     onDropdownVisibleChange?: (isOpen: boolean) => void;
 
     dropdownRender?: (menu: React.ReactElement) => React.ReactElement | undefined;
+    notFoundContent?: React.ReactNode;
 
     style?: React.CSSProperties;
     dropdownStyle?: React.CSSProperties;

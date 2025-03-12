@@ -14,7 +14,7 @@ import { REDESIGN_COLORS } from '../entityV2/shared/constants';
 import useSearchViewAll from './useSearchViewAll';
 import { useShowNavBarRedesign } from '../useShowNavBarRedesign';
 import { FiltersAppliedHandler } from './filtersPrototype/types';
-import { SearchBarV2 } from './SearchBarV2';
+import { SearchBarV2 } from './searchBarV2/SearchBarV2';
 
 const getStyles = ($isShowNavBarRedesign?: boolean) => {
     return {
@@ -153,7 +153,7 @@ export const SearchHeader = ({
     const styles = getStyles(isShowNavBarRedesign);
 
     const showSearchBarAutocompleteRedesign = true; //appConfig.config?.showSearchBarAutocompleteRedesign
-    const FinalSearchBar = showSearchBarAutocompleteRedesign ? SearchBar : SearchBarV2;
+    const FinalSearchBar = showSearchBarAutocompleteRedesign ? SearchBarV2 : SearchBar;
 
     return (
         <>
