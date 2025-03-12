@@ -369,6 +369,8 @@ export const SearchBarV2 = ({
 
     const autoCompleteEntityOptions = useMemo(() => {
         if (!hasAutocompleteResults) return [];
+        if (!searchQuery) return [];
+
         return [
             {
                 label: <EntityTypeLabel>Best Matches</EntityTypeLabel>,
@@ -394,7 +396,7 @@ export const SearchBarV2 = ({
                     .flat(),
             },
         ];
-    }, [finalCombineSiblings, effectiveQuery, suggestions, hasAutocompleteResults]);
+    }, [finalCombineSiblings, effectiveQuery, suggestions, hasAutocompleteResults, searchQuery]);
 
     const previousSelectedQuickFilterValue = usePrevious(selectedQuickFilter?.value);
 
@@ -604,12 +606,12 @@ export const SearchBarV2 = ({
                             showWrapping
                         >
                             <StyledSearchBar
-                                onFocusCapture={(event) => {
-                                    if (event.target instanceof Element) {
-                                        if (event.target.closest('.view-select-container')) return null;
-                                    }
-                                    setIsDropdownVisible(true);
-                                }}
+                                // onFocusCapture={(event) => {
+                                //     if (event.target instanceof Element) {
+                                //         if (event.target.closest('.view-select-container')) return null;
+                                //     }
+                                //     setIsDropdownVisible(true);
+                                // }}
                                 bordered={false}
                                 placeholder={placeholderText}
                                 onPressEnter={() => {
@@ -622,14 +624,14 @@ export const SearchBarV2 = ({
                                 value={searchQuery}
                                 onChange={(e) => {
                                     setSearchQuery(e.target.value);
-                                    setIsDropdownVisible(true);
+                                    // setIsDropdownVisible(true);
                                 }}
                                 data-testid="search-input"
-                                onFocus={handleFocus}
-                                onBlur={handleBlur}
+                                // onFocus={handleFocus}
+                                // onBlur={handleBlur}
                                 viewsEnabled={viewsEnabled}
                                 $isShowNavBarRedesign={isShowNavBarRedesign}
-                                allowClear={(isFocused && { clearIcon: <ClearIcon /> }) || false}
+                                allowClear={(isDropdownVisible && { clearIcon: <ClearIcon /> }) || false}
                                 prefix={
                                     <>
                                         <SearchIcon
@@ -644,7 +646,7 @@ export const SearchBarV2 = ({
                                     </>
                                 }
                                 ref={searchInputRef}
-                                suffix={<>{(showCommandK && !isFocused && <CommandK />) || null}</>}
+                                suffix={<>{(showCommandK && !isDropdownVisible && <CommandK />) || null}</>}
                                 $textColor={textColor}
                                 $placeholderColor={placeholderColor}
                                 width={'592px'}

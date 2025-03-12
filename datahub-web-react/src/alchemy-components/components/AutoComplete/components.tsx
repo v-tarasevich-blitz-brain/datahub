@@ -38,3 +38,7 @@ export const ChildrenWrapper = styled.div<{ $open?: boolean; $showWrapping?: boo
         box-shadow: ${BOX_SHADOW};
     `}
 `;
+
+export const DropdownInnerPopupContainer = styled.div`
+    position: absolute;
+`;
