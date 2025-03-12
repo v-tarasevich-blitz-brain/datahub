@@ -35,9 +35,10 @@ const DEFAULT_NUM_VISIBLE = 2;
 interface Props {
     parentEntities: Entity[];
     numVisible?: number;
+    hideIcons?: boolean;
 }
 
-export default function ParentEntities({ parentEntities, numVisible = DEFAULT_NUM_VISIBLE }: Props) {
+export default function ParentEntities({ parentEntities, numVisible = DEFAULT_NUM_VISIBLE, hideIcons }: Props) {
     const entityRegistry = useEntityRegistry();
 
     // parent nodes/domains are returned with direct parent first
@@ -78,7 +79,7 @@ export default function ParentEntities({ parentEntities, numVisible = DEFAULT_NU
                     const displayName = entityRegistry.getDisplayName(parentEntity.type, parentEntity);
                     return (
                         <>
-                            <FolderOpenOutlined />
+                            {!hideIcons && <FolderOpenOutlined />}
                             <ParentNode ellipsis={!hasHiddenEntities ? { tooltip: displayName } : true}>
                                 {displayName}
                             </ParentNode>

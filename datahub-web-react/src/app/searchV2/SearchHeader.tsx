@@ -13,6 +13,8 @@ import NavBarToggler from '../homeV2/layout/navBarRedesign/NavBarToggler';
 import { REDESIGN_COLORS } from '../entityV2/shared/constants';
 import useSearchViewAll from './useSearchViewAll';
 import { useShowNavBarRedesign } from '../useShowNavBarRedesign';
+import { FiltersAppliedHandler } from './filtersPrototype/types';
+import { SearchBarV2 } from './SearchBarV2';
 
 const getStyles = ($isShowNavBarRedesign?: boolean) => {
     return {
@@ -125,6 +127,7 @@ type Props = {
     suggestions: Array<AutoCompleteResultForEntity>;
     onSearch: (query: string) => void;
     onQueryChange: (query: string) => void;
+    onFilter?: FiltersAppliedHandler;
     entityRegistry: EntityRegistry;
 };
 
@@ -138,6 +141,7 @@ export const SearchHeader = ({
     onSearch,
     onQueryChange,
     entityRegistry,
+    onFilter,
 }: Props) => {
     const [, setIsSearchBarFocused] = useState(false);
     const appConfig = useAppConfig();
@@ -147,6 +151,9 @@ export const SearchHeader = ({
     const searchViewAll = useSearchViewAll();
     const isShowNavBarRedesign = useShowNavBarRedesign();
     const styles = getStyles(isShowNavBarRedesign);
+
+    const showSearchBarAutocompleteRedesign = true; //appConfig.config?.showSearchBarAutocompleteRedesign
+    const FinalSearchBar = showSearchBarAutocompleteRedesign ? SearchBar : SearchBarV2;
 
     return (
         <>
@@ -159,7 +166,7 @@ export const SearchHeader = ({
                         </NavBarTogglerWrapper>
                     )}
                     <SearchBarContainer $isShowNavBarRedesign={isShowNavBarRedesign}>
-                        <SearchBar
+                        <FinalSearchBar
                             isLoading={isUserInitializing || !appConfig.loaded}
                             id={V2_SEARCH_BAR_ID}
                             style={styles.searchBoxContainer}
@@ -174,6 +181,7 @@ export const SearchHeader = ({
                             setIsSearchBarFocused={setIsSearchBarFocused}
                             viewsEnabled={viewsEnabled}
                             isShowNavBarRedesign={isShowNavBarRedesign}
+                            onFilter={onFilter}
                             combineSiblings
                             fixAutoComplete
                             showQuickFilters

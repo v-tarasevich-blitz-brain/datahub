@@ -6,6 +6,8 @@ export function useShowNavBarRedesign() {
     const appConfig = useAppConfig();
     const isThemeV2Enabled = useIsThemeV2();
 
+    return true;
+
     if (!appConfig.loaded) {
         return loadFromLocalStorage();
     }

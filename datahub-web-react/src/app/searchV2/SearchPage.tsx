@@ -214,6 +214,7 @@ export const SearchPage = () => {
     // Render new browse v2 onboarding step if the feature flag is on
     useUpdateEducationStepsAllowList(showBrowseV2, SEARCH_RESULTS_BROWSE_SIDEBAR_ID);
 
+    // console.log('>>> data?.searchAcrossEntities?.facets', data?.searchAcrossEntities?.facets)
     return (
         <Container>
             {!loading && (

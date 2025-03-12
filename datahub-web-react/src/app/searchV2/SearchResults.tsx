@@ -233,6 +233,8 @@ export const SearchResults = ({
         showSeparateSiblings,
         searchResponse?.searchResults,
     );
+
+    // console.log('>>> combinedSiblingSearchResults', combinedSiblingSearchResults);
     const { selectedSortOption, setSelectedSortOption } = useSearchContext();
     // For vertical sidebar
     const [highlightedIndex, setHighlightedIndex] = useState<number | null>(0);

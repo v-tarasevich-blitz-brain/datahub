@@ -74,6 +74,7 @@ export default function SearchFilterOptions({
 
     let filterSet = availableFilters;
     if (filterSet.length) {
+        // TODO::? what is this?
         // Include non-facet filters and remove any duplicates in filterSet
         const nonFacetFilters = NON_FACET_FILTER_FIELDS.map(
             ({ field, displayName }): FacetMetadata => ({

@@ -47,6 +47,8 @@ export default function SearchFiltersSection({
         }
     }, [availableFilters, loading, finalAvailableFilters]);
 
+    // console.log('>>> activeFilters', activeFilters)
+
     return (
         <Section
             id={SEARCH_RESULTS_FILTERS_V2_INTRO}
