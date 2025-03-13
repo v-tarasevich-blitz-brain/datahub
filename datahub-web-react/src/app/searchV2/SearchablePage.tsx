@@ -23,6 +23,9 @@ import { useSelectedSortOption } from '../search/context/SearchContext';
 import { NavSidebar as NavSidebarRedesign } from '../homeV2/layout/navBarRedesign/NavSidebar';
 import { NavSidebar } from '../homeV2/layout/NavSidebar';
 import { useShowNavBarRedesign } from '../useShowNavBarRedesign';
+import { FieldToAppliedFieldFiltersMap } from './filtersPrototype/types';
+import { generateOrFilters } from './utils/generateOrFilters';
+import { UnionType } from './utils/constants';
 
 const Body = styled.div`
     display: flex;
@@ -91,6 +94,9 @@ export const SearchablePage = ({ children }: Props) => {
     const [newSuggestionData, setNewSuggestionData] = useState<GetAutoCompleteMultipleResultsQuery | undefined>();
     const viewUrn = userContext.localState?.selectedViewUrn;
 
+    const [appliedFilters, setAppliedFilters] = useState<FieldToAppliedFieldFiltersMap>(new Map());
+    const [searchQuery, setSearchQuery] = useState<string>(currentQuery);
+
     useEffect(() => {
         if (suggestionsData !== undefined) {
             setNewSuggestionData(suggestionsData);
@@ -131,6 +137,29 @@ export const SearchablePage = ({ children }: Props) => {
         }
     }, FIFTH_SECOND_IN_MS);
 
+    const autoCompleteWithFilters = debounce((query: string) => {
+        // TODO:: show initial state (with empty request)?
+        if (query.trim() === '') return null;
+
+        const filters = Array.from(appliedFilters.values())
+            .flatMap((value) => value.filters)
+            .filter((filter) => filter.values?.length);
+
+        getAutoCompleteResults({
+            variables: {
+                input: {
+                    query,
+                    viewUrn,
+                    orFilters: generateOrFilters(UnionType.AND, filters),
+                },
+            },
+        });
+    }, FIFTH_SECOND_IN_MS);
+
+    useEffect(() => {
+        autoCompleteWithFilters(searchQuery);
+    }, [appliedFilters, searchQuery]);
+
     // Load correct autocomplete results on initial page load.
     useEffect(() => {
         if (currentQuery && currentQuery.trim() !== '') {
@@ -159,8 +188,12 @@ export const SearchablePage = ({ children }: Props) => {
                     []
                 }
                 onSearch={search}
-                onQueryChange={autoComplete}
+                onQueryChange={setSearchQuery}
                 entityRegistry={entityRegistry}
+                onFilter={(filters) => {
+                    setAppliedFilters(filters);
+                    console.log('>>> onFilter', filters);
+                }}
             />
             <BodyBackground $isShowNavBarRedesign={isShowNavBarRedesign} />
             <Body>
