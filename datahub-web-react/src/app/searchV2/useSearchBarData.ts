@@ -30,16 +30,21 @@ const useAutocompleteAPI = (): APIResponse => {
 
     const updateData = useCallback(
         (query: string, orFilters: AndFilterInput[], types: EntityType[], viewUrn: string | undefined) => {
-            getAutoCompleteMultipleResults({
-                variables: {
-                    input: {
-                        query,
-                        orFilters,
-                        types,
-                        viewUrn,
+            if (query.length === 0) {
+                setEntities(undefined);
+                setFacets(undefined);
+            } else {
+                getAutoCompleteMultipleResults({
+                    variables: {
+                        input: {
+                            query,
+                            orFilters,
+                            types,
+                            viewUrn,
+                        },
                     },
-                },
-            });
+                });
+            }
         },
         [getAutoCompleteMultipleResults],
     );
@@ -98,6 +103,7 @@ export const useSearchBarData = (
     appliedFilters: FieldToAppliedFieldFiltersMap | undefined,
     searchAPIVariant: 'searchAcrossEntitiesAPI' | 'autocompleteAPI' | undefined,
 ) => {
+    const [debouncedQuery, setDebouncedQuery] = useState<string>('');
     const autocompleteAPI = useAutocompleteAPI();
     const searchAPI = useSearchAPI();
 
@@ -112,22 +118,20 @@ export const useSearchBarData = (
         }
     }, [searchAPIVariant, autocompleteAPI, searchAPI]);
 
+    useDebounce(() => setDebouncedQuery(query), 300, [query]);
+
     const updateData = useMemo(() => api.updateData, [api.updateData]);
     const entities = useMemo(() => api.entities, [api.entities]);
     const facets = useMemo(() => api.facets, [api.facets]);
     const loading = useMemo(() => api.loading, [api.loading]);
 
-    useDebounce(
-        () => {
-            const flatAppliedFilters = Array.from(appliedFilters?.values?.() || [])
-                .flatMap((value) => value.filters)
-                .filter((filter) => filter.values?.length);
+    useEffect(() => {
+        const flatAppliedFilters = Array.from(appliedFilters?.values?.() || [])
+            .flatMap((value) => value.filters)
+            .filter((filter) => filter.values?.length);
 
-            updateData(query, generateOrFilters(UnionType.AND, flatAppliedFilters), [], undefined);
-        },
-        300,
-        [updateData, query, appliedFilters],
-    );
+        updateData(debouncedQuery, generateOrFilters(UnionType.AND, flatAppliedFilters), [], undefined);
+    }, [updateData, debouncedQuery, appliedFilters]);
 
     return { entities, facets, loading };
 };
