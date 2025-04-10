@@ -1,19 +1,20 @@
 import {
     useGetAutoCompleteMultipleResultsLazyQuery,
-    useGetSearchResultsForMultipleForSearchBarLazyQuery,
+    useGetSearchResultsForMultipleTrimmedLazyQuery,
 } from '@src/graphql/search.generated';
 import { AndFilterInput, Entity, EntityType, FacetMetadata } from '@src/types.generated';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
 import { FieldToAppliedFieldFiltersMap } from './filtersV2/types';
 import { generateOrFilters } from './utils/generateOrFilters';
-import { UnionType } from './utils/constants';
+import { ENTITY_SUB_TYPE_FILTER_NAME, UnionType } from './utils/constants';
+import { isEntityType } from '../entityV2/shared/utils';
 
 type UpdateDataFunction = (
     query: string,
     orFilters: AndFilterInput[],
     types: EntityType[],
-    viewUrn: string | undefined,
+    viewUrn: string | undefined | null,
 ) => void;
 
 type APIResponse = {
@@ -23,13 +24,21 @@ type APIResponse = {
     loading?: boolean;
 };
 
+export type SearchResponse = {
+    facets?: FacetMetadata[];
+    entities?: Entity[];
+    loading?: boolean;
+};
+
+const SEARCH_API_RESPONSE_MAX_ITEMS = 20;
+
 const useAutocompleteAPI = (): APIResponse => {
     const [entities, setEntities] = useState<Entity[] | undefined>();
     const [facets, setFacets] = useState<FacetMetadata[] | undefined>();
     const [getAutoCompleteMultipleResults, { data, loading }] = useGetAutoCompleteMultipleResultsLazyQuery();
 
     const updateData = useCallback(
-        (query: string, orFilters: AndFilterInput[], types: EntityType[], viewUrn: string | undefined) => {
+        (query: string, orFilters: AndFilterInput[], types: EntityType[], viewUrn: string | undefined | null) => {
             if (query.length === 0) {
                 setEntities(undefined);
                 setFacets(undefined);
@@ -63,11 +72,10 @@ const useSearchAPI = (): APIResponse => {
     const [entities, setEntities] = useState<Entity[] | undefined>();
     const [facets, setFacets] = useState<FacetMetadata[] | undefined>();
 
-    const [getSearchResultsForMultiple, { data, loading }] = useGetSearchResultsForMultipleForSearchBarLazyQuery();
+    const [getSearchResultsForMultiple, { data, loading }] = useGetSearchResultsForMultipleTrimmedLazyQuery();
 
-    // TODO:: pass types and viewUrn
     const updateData = useCallback(
-        (query: string, orFilters: AndFilterInput[], types: EntityType[], viewUrn: string | undefined) => {
+        (query: string, orFilters: AndFilterInput[], types: EntityType[], viewUrn: string | undefined | null) => {
             // SearchAPI supports queries with 3 or longer characters
             if (query.length < 3) {
                 setEntities(undefined);
@@ -77,9 +85,10 @@ const useSearchAPI = (): APIResponse => {
                     variables: {
                         input: {
                             query,
+                            types,
                             viewUrn,
                             orFilters,
-                            count: 20,
+                            count: SEARCH_API_RESPONSE_MAX_ITEMS,
                         },
                     },
                 });
@@ -98,12 +107,13 @@ const useSearchAPI = (): APIResponse => {
     return { updateData, entities, facets, loading };
 };
 
-// TODO:: add option for old search bar to skip query
 export const useSearchBarData = (
     query: string,
     appliedFilters: FieldToAppliedFieldFiltersMap | undefined,
+    viewUrn: string | undefined | null,
     searchAPIVariant: 'searchAcrossEntitiesAPI' | 'autocompleteAPI' | undefined,
-) => {
+    enabled: boolean,
+): SearchResponse => {
     const [debouncedQuery, setDebouncedQuery] = useState<string>('');
     const autocompleteAPI = useAutocompleteAPI();
     const searchAPI = useSearchAPI();
@@ -127,12 +137,21 @@ export const useSearchBarData = (
     const loading = useMemo(() => api.loading, [api.loading]);
 
     useEffect(() => {
-        const flatAppliedFilters = Array.from(appliedFilters?.values?.() || [])
-            .flatMap((value) => value.filters)
-            .filter((filter) => filter.values?.length);
+        if (enabled) {
+            const entityTypes =
+                appliedFilters
+                    ?.get(ENTITY_SUB_TYPE_FILTER_NAME)
+                    ?.filters?.flatMap((filter) => filter.values)
+                    ?.filter(isEntityType) ?? [];
 
-        updateData(debouncedQuery, generateOrFilters(UnionType.AND, flatAppliedFilters), [], undefined);
-    }, [updateData, debouncedQuery, appliedFilters]);
+            const flatAppliedFilters = Array.from(appliedFilters?.entries?.() || [])
+                .filter(([key, _]) => key !== ENTITY_SUB_TYPE_FILTER_NAME)
+                .flatMap(([_, value]) => value.filters)
+                .filter((filter) => filter.values?.length);
+
+            updateData(debouncedQuery, generateOrFilters(UnionType.AND, flatAppliedFilters), entityTypes, viewUrn);
+        }
+    }, [updateData, debouncedQuery, appliedFilters, viewUrn, enabled]);
 
     return { entities, facets, loading };
 };
