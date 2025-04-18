@@ -21,6 +21,7 @@ import DropdownSearchBar from '@components/components/Select/private/DropdownSea
 import DropdownSelectAllOption from '@components/components/Select/private/DropdownSelectAllOption';
 import SelectLabelRenderer from '@components/components/Select/private/SelectLabelRenderer/SelectLabelRenderer';
 import { ActionButtonsProps, SelectOption, SelectProps } from '@components/components/Select/types';
+import { useIsVisible } from './private/hooks/useIsVisible';
 
 const SelectActionButtons = ({
     selectedValues,
@@ -102,6 +103,11 @@ export const SimpleSelect = ({
     const selectRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [areAllSelected, setAreAllSelected] = useState(false);
+    const visible = useIsVisible(selectRef);
+
+    useEffect(() => {
+        if (!visible) setIsOpen(false);
+    }, [visible]);
 
     useEffect(() => {
         if (values !== undefined && !isEqual(selectedValues, values)) {

@@ -99,6 +99,13 @@ const SearchBarInput = forwardRef<InputRef, Props>(
                 <StyledSearchBar
                     placeholder={placeholder}
                     onPressEnter={onSearch}
+                    onKeyDown={e => {
+                        // TODO:: refactor
+                        if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                        console.log('>>> KeyDown', e.key)
+                    }}
                     value={value}
                     onChange={(_, event) => onChange?.(event)}
                     data-testid="search-input"

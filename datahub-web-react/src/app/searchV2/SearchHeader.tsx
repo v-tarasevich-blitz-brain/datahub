@@ -151,7 +151,7 @@ export const SearchHeader = ({
     const isShowNavBarRedesign = useShowNavBarRedesign();
     const styles = getStyles(isShowNavBarRedesign);
 
-    const showSearchBarAutocompleteRedesign = appConfig.config.featureFlags?.showSearchBarAutocompleteRedesign;
+    const showSearchBarAutocompleteRedesign = true;//appConfig.config.featureFlags?.showSearchBarAutocompleteRedesign;
     const FinalSearchBar = showSearchBarAutocompleteRedesign ? SearchBarV2 : SearchBar;
 
     return (

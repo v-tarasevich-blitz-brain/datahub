@@ -59,9 +59,9 @@ query appConfig {
         viewsConfig {
             enabled
         }
-        searchBarConfig {
-            apiVariant
-        }
+        # searchBarConfig {
+        #     apiVariant
+        # }
         featureFlags {
             readOnlyModeEnabled
             showSearchFiltersV2
@@ -87,7 +87,7 @@ query appConfig {
             showAutoCompleteResults
             entityVersioningEnabled
             showHasSiblingsFilter
-            showSearchBarAutocompleteRedesign
+            # showSearchBarAutocompleteRedesign
             showManageTags
         }
         chromeExtensionConfig {

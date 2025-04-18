@@ -106,6 +106,10 @@ function useSearchKeyboardControls(
 ) {
     return useCallback(
         (event: KeyboardEvent) => {
+            console.log('>>> useSearchKeyboardControls', event, (event.target as HTMLElement).closest('v2-search-bar'));
+
+            if ((event.target as HTMLElement).closest('#v2-search-bar')) return null;
+
             const prevIndex = highlightedIndex;
             let newIndex: number | null | undefined;
             if (event.key === 'ArrowDown') {

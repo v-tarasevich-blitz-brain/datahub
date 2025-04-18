@@ -76,7 +76,7 @@ const isSearchResultPage = (path: string) => {
 export const SearchablePage = ({ children }: Props) => {
     const location = useLocation();
     const appConfig = useAppConfig();
-    const showSearchBarAutocompleteRedesign = appConfig.config.featureFlags?.showSearchBarAutocompleteRedesign;
+    const showSearchBarAutocompleteRedesign = true;// appConfig.config.featureFlags?.showSearchBarAutocompleteRedesign;
     const params = QueryString.parse(location.search, { arrayFormat: 'comma' });
     const paramFilters: Array<FacetFilterInput> = useFilters(params);
     const filters = isSearchResultPage(location.pathname) ? paramFilters : [];
